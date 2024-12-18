@@ -14,6 +14,9 @@ func main() {
 	projectPath := rese.C1(os.Getwd())
 	zaplog.LOG.Debug("project:", zap.String("path", projectPath))
 
+	executePath := rese.C1(os.Executable())
+	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
+
 	modInfo := rese.P1(depbump.GetModInfo(projectPath))
 	zaplog.LOG.Debug("require:", zap.Int("size", len(modInfo.Require)))
 
