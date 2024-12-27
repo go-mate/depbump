@@ -11,13 +11,15 @@ import (
 )
 
 func UpdateModule(projectPath string, modulePath string) error {
-	output, err := osexec.NewOsCommand().WithPath(projectPath).WithMatchPipe(func(line string) bool {
-		upgradeInfo, matched := MatchUpgrade(line)
-		if matched {
-			zaplog.SUG.Debugln("match-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
-		}
-		return matched
-	}).ExecInPipe("go", "get", "-u", modulePath)
+	output, err := osexec.NewOsCommand().WithPath(projectPath).
+		WithMatchMore(true).
+		WithMatchPipe(func(line string) bool {
+			upgradeInfo, matched := MatchUpgrade(line)
+			if matched {
+				zaplog.SUG.Debugln("match-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
+			}
+			return matched
+		}).ExecInPipe("go", "get", "-u", modulePath)
 	if err != nil {
 		if len(output) > 0 {
 			zaplog.SUG.Warnln(string(output))

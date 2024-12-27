@@ -4,11 +4,11 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 # install
 
 ```bash
-go install github.com/go-mate/depbump/cmd/depbump-direct-onebyone@latest
+go install github.com/go-mate/depbump/cmd/depbump-directs@latest
 ```
 
 # command
 
 ```bash
-cd project-path && depbump-direct-onebyone
+cd project-path && depbump-directs
 ```
