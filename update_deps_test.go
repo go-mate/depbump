@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/yyle88/osexec"
 	"github.com/yyle88/runpath"
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 )
@@ -12,13 +13,14 @@ func TestUpdateModule(t *testing.T) {
 	projectPath := runpath.PARENT.Path()
 	t.Log(projectPath)
 
-	modInfo, err := GetModInfo(projectPath)
+	moduleInfo, err := GetModuleInfo(projectPath)
 	require.NoError(t, err)
-	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), modInfo.Module.Path)
+	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleInfo.Module.Path)
 
-	for _, dep := range modInfo.Require {
+	execConfig := osexec.NewExecConfig().WithDebug().WithPath(projectPath)
+	for _, dep := range moduleInfo.Require {
 		if !dep.Indirect {
-			require.NoError(t, UpdateModule(projectPath, dep.Path))
+			require.NoError(t, UpdateModule(execConfig, dep.Path))
 			return // once is enough
 		}
 	}

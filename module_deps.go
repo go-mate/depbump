@@ -21,22 +21,32 @@ type Require struct {
 	Indirect bool   `json:"Indirect"`
 }
 
-type ModInfo struct {
+type ModuleInfo struct {
 	Module  *Module    `json:"Module"`
 	Go      string     `json:"Go"`
 	Require []*Require `json:"Require"`
 }
 
-func GetModInfo(projectPath string) (*ModInfo, error) {
+func (a *ModuleInfo) GetDirectModules() []*Require {
+	var directModules []*Require
+	for _, require := range a.Require {
+		if !require.Indirect {
+			directModules = append(directModules, require)
+		}
+	}
+	return directModules
+}
+
+func GetModuleInfo(projectPath string) (*ModuleInfo, error) {
 	output, err := osexec.ExecInPath(projectPath, "go", "mod", "edit", "-json")
 	if err != nil {
 		return nil, erero.Wro(err)
 	}
-	var modInfo ModInfo
-	if err := json.Unmarshal(output, &modInfo); err != nil {
+	var moduleInfo ModuleInfo
+	if err := json.Unmarshal(output, &moduleInfo); err != nil {
 		return nil, erero.Wro(err)
 	}
-	return &modInfo, nil
+	return &moduleInfo, nil
 }
 
 func ParseModuleFile(projectPath string) (*modfile.File, error) {

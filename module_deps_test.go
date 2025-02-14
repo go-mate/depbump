@@ -12,12 +12,12 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-func TestGetModInfo(t *testing.T) {
-	modInfo, err := GetModInfo(runpath.PARENT.Path())
+func TestGetModuleInfo(t *testing.T) {
+	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
 	require.NoError(t, err)
-	t.Log(neatjsons.S(modInfo))
+	t.Log(neatjsons.S(moduleInfo))
 
-	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), modInfo.Module.Path)
+	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleInfo.Module.Path)
 }
 
 func TestParseModuleFileDemo(t *testing.T) {
