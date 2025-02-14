@@ -15,6 +15,7 @@ require (
 	github.com/yyle88/rese v0.0.3
 	github.com/yyle88/runpath v1.0.23
 	github.com/yyle88/syntaxgo v0.0.44
+	github.com/yyle88/tern v0.0.5
 	github.com/yyle88/zaplog v0.0.19
 	go.uber.org/zap v1.27.0
 	golang.org/x/mod v0.23.0
@@ -30,7 +31,6 @@ require (
 	github.com/yyle88/mutexmap v1.0.10 // indirect
 	github.com/yyle88/printgo v1.0.2 // indirect
 	github.com/yyle88/sure v0.0.36 // indirect
-	github.com/yyle88/tern v0.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
 	golang.org/x/tools v0.30.0 // indirect

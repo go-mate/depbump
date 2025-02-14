@@ -12,8 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func UpdateModule(execConfig *osexec.ExecConfig, modulePath string) error {
+func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, toolchain string) error {
 	output, err := execConfig.ShallowClone().
+		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			upgradeInfo, matched := MatchUpgrade(line)
@@ -93,10 +94,10 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 }
 
 func UpdateDirectRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateRequires(execConfig, moduleInfo.GetDirectModules())
+	UpdateRequires(execConfig, moduleInfo.GetDirectModules(), moduleInfo.GetToolchainVersion())
 }
 
-func UpdateRequires(execConfig *osexec.CommandConfig, requires []*Require) {
+func UpdateRequires(execConfig *osexec.CommandConfig, requires []*Require, toolchain string) {
 	type Warning struct {
 		Path string `json:"path"`
 		Warn string `json:"warn"`
@@ -106,7 +107,7 @@ func UpdateRequires(execConfig *osexec.CommandConfig, requires []*Require) {
 	for idx, dep := range requires {
 		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
 		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
-		if err := UpdateModule(execConfig, dep.Path); err != nil {
+		if err := UpdateModule(execConfig, dep.Path, toolchain); err != nil {
 			warnings = append(warnings, &Warning{
 				Path: dep.Path,
 				Warn: err.Error(),

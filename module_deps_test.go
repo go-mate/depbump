@@ -18,6 +18,9 @@ func TestGetModuleInfo(t *testing.T) {
 	t.Log(neatjsons.S(moduleInfo))
 
 	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleInfo.Module.Path)
+
+	t.Log(moduleInfo.Module.Path)
+	t.Log(moduleInfo.Go)
 }
 
 func TestParseModuleFileDemo(t *testing.T) {

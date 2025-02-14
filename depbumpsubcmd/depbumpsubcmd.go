@@ -76,7 +76,8 @@ func RunGoWorkSync(execConfig *osexec.ExecConfig) error {
 func UpdateModules(config *workconfig.WorkspacesExecConfig) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
-			must.Done(updateModules(config.GetSubCommand(projectPath), projectPath))
+			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
+			must.Done(updateModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion()))
 			must.Done(RunGoModuleTide(config.GetSubCommand(projectPath)))
 		}
 		if workspace.WorkRoot != "" {
@@ -85,9 +86,10 @@ func UpdateModules(config *workconfig.WorkspacesExecConfig) {
 	}
 }
 
-func updateModules(execConfig *osexec.ExecConfig, projectPath string) error {
+func updateModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string) error {
 	var matchedOnce bool
 	output, err := execConfig.ShallowClone().
+		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithPath(projectPath).
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {

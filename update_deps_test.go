@@ -20,7 +20,7 @@ func TestUpdateModule(t *testing.T) {
 	execConfig := osexec.NewExecConfig().WithDebug().WithPath(projectPath)
 	for _, dep := range moduleInfo.Require {
 		if !dep.Indirect {
-			require.NoError(t, UpdateModule(execConfig, dep.Path))
+			require.NoError(t, UpdateModule(execConfig, dep.Path, moduleInfo.GetToolchainVersion()))
 			return // once is enough
 		}
 	}
