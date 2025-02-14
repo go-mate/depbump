@@ -41,14 +41,46 @@ func UpdateDirects(config *workconfig.WorkspacesExecConfig) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			depbump.UpdateDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			must.Done(RunGoModuleTide(config.GetSubCommand(projectPath)))
+		}
+		if workspace.WorkRoot != "" {
+			must.Done(RunGoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
 		}
 	}
+}
+
+func RunGoModuleTide(execConfig *osexec.ExecConfig) error {
+	output, err := execConfig.Exec("go", "mod", "tidy", "-e")
+	if err != nil {
+		if len(output) > 0 {
+			zaplog.SUG.Warnln(string(output))
+		}
+		return erero.Wro(err)
+	}
+	zaplog.SUG.Debugln(string(output))
+	return nil
+}
+
+func RunGoWorkSync(execConfig *osexec.ExecConfig) error {
+	output, err := execConfig.Exec("go", "work", "sync")
+	if err != nil {
+		if len(output) > 0 {
+			zaplog.SUG.Warnln(string(output))
+		}
+		return erero.Wro(err)
+	}
+	zaplog.SUG.Debugln(string(output))
+	return nil
 }
 
 func UpdateModules(config *workconfig.WorkspacesExecConfig) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			must.Done(updateModules(config.GetSubCommand(projectPath), projectPath))
+			must.Done(RunGoModuleTide(config.GetSubCommand(projectPath)))
+		}
+		if workspace.WorkRoot != "" {
+			must.Done(RunGoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
 		}
 	}
 }
