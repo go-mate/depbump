@@ -25,5 +25,5 @@ func main() {
 	execConfig := osexec.NewExecConfig().WithDebug().WithPath(projectPath)
 	depbump.UpdateDirectRequires(execConfig, moduleInfo)
 
-	must.Done(depbumpsubcmd.RunGoModuleTide(execConfig))
+	must.Done(depbumpsubcmd.RunGoModTide(execConfig))
 }
