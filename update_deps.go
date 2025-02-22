@@ -3,18 +3,39 @@ package depbump
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/yyle88/erero"
 	"github.com/yyle88/eroticgo"
+	"github.com/yyle88/must"
+	"github.com/yyle88/must/muststrings"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
+	"github.com/yyle88/tern"
 	"github.com/yyle88/zaplog"
 	"go.uber.org/zap"
 )
 
-func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, toolchain string) error {
+func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig *UpdateConfig) error {
+	must.Nice(execConfig)
+	must.Nice(modulePath)
+	must.Nice(updateConfig)
+	must.Nice(updateConfig.Toolchain)
+
+	commands := tern.BFF(updateConfig.GetLatest, func() []string {
+		modulePathLatest := tern.BVF(strings.HasSuffix(modulePath, "@latest"), modulePath, func() string {
+			muststrings.NotContains(modulePath, "@")
+			return modulePath + "@latest"
+		})
+
+		return []string{"go", "get", modulePathLatest}
+	}, func() []string {
+		return []string{"go", "get", "-u", modulePath}
+	})
+	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
+
 	output, err := execConfig.ShallowClone().
-		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
+		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			upgradeInfo, matched := MatchUpgrade(line)
@@ -28,7 +49,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, toolchain st
 				return true
 			}
 			return false
-		}).ExecInPipe("go", "get", "-u", modulePath)
+		}).ExecInPipe(commands[0], commands[1:]...)
 	if err != nil {
 		if len(output) > 0 {
 			zaplog.SUG.Warnln(string(output))
@@ -94,10 +115,43 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 }
 
 func UpdateDirectRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateRequires(execConfig, moduleInfo.GetDirectModules(), moduleInfo.GetToolchainVersion())
+	UpdateDeps(execConfig, moduleInfo.GetDirectModules(), &UpdateConfig{
+		Toolchain: moduleInfo.GetToolchainVersion(),
+		GetLatest: false,
+	})
 }
 
-func UpdateRequires(execConfig *osexec.CommandConfig, requires []*Require, toolchain string) {
+func UpdateRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
+	UpdateDeps(execConfig, moduleInfo.Require, &UpdateConfig{
+		Toolchain: moduleInfo.GetToolchainVersion(),
+		GetLatest: false,
+	})
+}
+
+func GetLatestDirectRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
+	UpdateDeps(execConfig, moduleInfo.GetDirectModules(), &UpdateConfig{
+		Toolchain: moduleInfo.GetToolchainVersion(),
+		GetLatest: true,
+	})
+}
+
+func GetLatestRequests(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
+	UpdateDeps(execConfig, moduleInfo.Require, &UpdateConfig{
+		Toolchain: moduleInfo.GetToolchainVersion(),
+		GetLatest: true,
+	})
+}
+
+type UpdateConfig struct {
+	Toolchain string
+	GetLatest bool
+}
+
+func UpdateDeps(execConfig *osexec.CommandConfig, requires []*Require, updateConfig *UpdateConfig) {
+	must.Nice(execConfig)
+	must.Nice(updateConfig)
+	must.Nice(updateConfig.Toolchain)
+
 	type Warning struct {
 		Path string `json:"path"`
 		Warn string `json:"warn"`
@@ -107,7 +161,8 @@ func UpdateRequires(execConfig *osexec.CommandConfig, requires []*Require, toolc
 	for idx, dep := range requires {
 		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
 		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
-		if err := UpdateModule(execConfig, dep.Path, toolchain); err != nil {
+
+		if err := UpdateModule(execConfig, dep.Path, updateConfig); err != nil {
 			warnings = append(warnings, &Warning{
 				Path: dep.Path,
 				Warn: err.Error(),

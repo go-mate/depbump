@@ -83,20 +83,37 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 }
 
 func NewUpdateDirectCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "direct",
 		Short: "go module update direct",
 		Long:  "go module update direct",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDirectDeps(config)
+			UpdateDirectDeps(config, false)
+		},
+	}
+	cmd.AddCommand(NewUpdateDirectGetLatestCmd(config))
+	return cmd
+}
+
+func NewUpdateDirectGetLatestCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+	return &cobra.Command{
+		Use:   "latest",
+		Short: "go module update direct latest",
+		Long:  "go module update direct latest",
+		Run: func(cmd *cobra.Command, args []string) {
+			UpdateDirectDeps(config, true)
 		},
 	}
 }
 
-func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig) {
+func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig, getLatest bool) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
-			depbump.UpdateDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			if getLatest {
+				depbump.GetLatestDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			} else {
+				depbump.UpdateDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			}
 			must.Done(RunGoModTide(config.GetSubCommand(projectPath)))
 		}
 		if workspace.WorkRoot != "" {
@@ -106,21 +123,34 @@ func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig) {
 }
 
 func NewUpdateModuleCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "module",
 		Short: "go module update module",
 		Long:  "go module update module",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDepModules(config)
+			UpdateDepModules(config, false)
+		},
+	}
+	cmd.AddCommand(NewUpdateModuleGetLatestCmd(config))
+	return cmd
+}
+
+func NewUpdateModuleGetLatestCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+	return &cobra.Command{
+		Use:   "latest",
+		Short: "go module update module latest",
+		Long:  "go module update module latest",
+		Run: func(cmd *cobra.Command, args []string) {
+			UpdateDepModules(config, true)
 		},
 	}
 }
 
-func UpdateDepModules(config *workconfig.WorkspacesExecConfig) {
+func UpdateDepModules(config *workconfig.WorkspacesExecConfig, getLatest bool) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
-			must.Done(updateDepModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion()))
+			must.Done(updateDepModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion(), getLatest))
 			must.Done(RunGoModTide(config.GetSubCommand(projectPath)))
 		}
 		if workspace.WorkRoot != "" {
@@ -129,13 +159,17 @@ func UpdateDepModules(config *workconfig.WorkspacesExecConfig) {
 	}
 }
 
-func updateDepModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string) error {
+func updateDepModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string, getLatest bool) error {
 	success, err := updateDeps(execConfig, projectPath, toolchain)
 	if err != nil {
 		return erero.Wro(err)
 	}
 	if !success {
-		depbump.UpdateDirectRequires(execConfig.ShallowClone().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+		if getLatest {
+			depbump.GetLatestDirectRequires(execConfig.ShallowClone().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+		} else {
+			depbump.UpdateDirectRequires(execConfig.ShallowClone().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+		}
 	}
 	return nil
 }
