@@ -10,23 +10,26 @@ import (
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
-	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 )
 
 func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+	var defaultLatest bool // Use the latest version if no tagged version
+
 	cmd := &cobra.Command{
 		Use:   "sync-tags",
 		Short: "go sync workspace tags",
 		Long:  "go sync workspace tags",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(SyncTags(config))
+			must.Done(SyncTags(config, defaultLatest))
 		},
 	}
+
+	cmd.Flags().BoolVarP(&defaultLatest, "default_latest", "m", false, "Use the latest version if no tagged version")
 	return cmd
 }
 
-func SyncTags(config *workconfig.WorkspacesExecConfig) error {
+func SyncTags(config *workconfig.WorkspacesExecConfig, defaultLatest bool) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
 
@@ -43,7 +46,13 @@ func SyncTags(config *workconfig.WorkspacesExecConfig) error {
 			if !ok {
 				continue
 			}
-			zerotern.SetPV(&pkgTag, "latest") // 假如没有 tag 版本号，则默认为 latest 的
+			if pkgTag == "" {
+				if defaultLatest {
+					pkgTag = "latest" // 假如没有 tag 版本号，则默认为 latest 的
+				} else {
+					continue
+				}
+			}
 
 			if pkgTag == module.Version {
 				zaplog.SUG.Debugln(projectPath, module.Path, module.Version, "same")
