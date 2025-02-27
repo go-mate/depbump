@@ -12,7 +12,7 @@ require (
 	github.com/yyle88/eroticgo v0.0.3
 	github.com/yyle88/must v0.0.16
 	github.com/yyle88/neatjson v0.0.11
-	github.com/yyle88/osexec v0.0.21
+	github.com/yyle88/osexec v0.0.22
 	github.com/yyle88/osexistpath v0.0.16
 	github.com/yyle88/rese v0.0.3
 	github.com/yyle88/runpath v1.0.23

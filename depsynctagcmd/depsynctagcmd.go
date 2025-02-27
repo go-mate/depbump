@@ -13,23 +13,52 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
-	var defaultLatest bool // Use the latest version if no tagged version
-
+func SyncDepsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "sync-tags",
-		Short: "go sync workspace tags",
-		Long:  "go sync workspace tags",
+		Use:   "sync",
+		Short: "go workspace sync",
+		Long:  "go workspace sync",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(SyncTags(config, defaultLatest))
+			must.Done(config.ForeachWorkRootRun(func(workspace *workconfig.Workspace, execConfig *osexec.ExecConfig) error {
+				output, err := execConfig.Exec("go", "work", "sync")
+				if err != nil {
+					return erero.Wro(err)
+				}
+				zaplog.SUG.Debugln(string(output))
+				return nil
+			}))
 		},
 	}
-
-	cmd.Flags().BoolVarP(&defaultLatest, "default_latest", "m", false, "Use the latest version if no tagged version")
+	cmd.AddCommand(SyncTagsCmd(config))
+	cmd.AddCommand(SyncSubsCmd(config))
 	return cmd
 }
 
-func SyncTags(config *workconfig.WorkspacesExecConfig, defaultLatest bool) error {
+func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "tags",
+		Short: "go workspace sync tags",
+		Long:  "go workspace sync tags",
+		Run: func(cmd *cobra.Command, args []string) {
+			must.Done(SyncTags(config, false))
+		},
+	}
+	return cmd
+}
+
+func SyncSubsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "subs",
+		Short: "go workspace sync subs",
+		Long:  "go workspace sync subs",
+		Run: func(cmd *cobra.Command, args []string) {
+			must.Done(SyncTags(config, true))
+		},
+	}
+	return cmd
+}
+
+func SyncTags(config *workconfig.WorkspacesExecConfig, useLatest bool) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
 
@@ -47,7 +76,7 @@ func SyncTags(config *workconfig.WorkspacesExecConfig, defaultLatest bool) error
 				continue
 			}
 			if pkgTag == "" {
-				if defaultLatest {
+				if useLatest {
 					pkgTag = "latest" // 假如没有 tag 版本号，则默认为 latest 的
 				} else {
 					continue
