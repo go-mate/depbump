@@ -10,6 +10,7 @@ import (
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
+	"github.com/yyle88/tern/zerotern"
 	"github.com/yyle88/zaplog"
 )
 
@@ -37,23 +38,32 @@ func SyncTags(config *workconfig.WorkspacesExecConfig) error {
 			if module.Indirect {
 				continue
 			}
+
 			pkgTag, ok := pkgTagsMap[module.Path]
 			if !ok {
 				continue
 			}
+			zerotern.SetPV(&pkgTag, "latest") // 假如没有 tag 版本号，则默认为 latest 的
+
 			if pkgTag == module.Version {
-				zaplog.SUG.Debugln(module.Path, module.Version, "same")
+				zaplog.SUG.Debugln(projectPath, module.Path, module.Version, "same")
 				continue
 			}
-			zaplog.SUG.Debugln(module.Path, module.Version, "sync")
+			zaplog.SUG.Debugln(projectPath, module.Path, module.Version, "sync", "=>", pkgTag)
 
-			output, err := config.GetSubCommand(projectPath).Exec("go", "get", "-u", module.Path+"@"+pkgTag)
+			// GOTOOLCHAIN=go1.22.8 go get -u github.com/yyle88/syntaxgo@v0.0.45
+			// go: golang.org/x/exp@v0.0.0-20250218142911-aa4b98e5adaa requires go >= 1.23.0 (running go 1.22.8; GOTOOLCHAIN=go1.22.8)
+			// 因此正确的做法是不带 -u 选项
+			// GOTOOLCHAIN=go1.22.8 go get github.com/yyle88/syntaxgo@v0.0.45
+			// go: upgraded github.com/yyle88/syntaxgo v0.0.44 => v0.0.45
+			// 这里需要注意
+			output, err := config.GetSubCommand(projectPath).Exec("go", "get", module.Path+"@"+pkgTag)
 			if err != nil {
 				return erero.Wro(err)
 			}
 			zaplog.SUG.Debugln(string(output))
 
-			zaplog.SUG.Debugln(module.Path, module.Version, "done")
+			zaplog.SUG.Debugln(projectPath, module.Path, module.Version, "sync", "=>", pkgTag, "done")
 		}
 	}
 
@@ -65,12 +75,14 @@ func SyncTags(config *workconfig.WorkspacesExecConfig) error {
 func GetPkgTagsMap(config *workconfig.WorkspacesExecConfig) map[string]string {
 	pkgTagsMap := make(map[string]string)
 	must.Done(config.ForeachProjectExec(func(projectPath string, execConfig *osexec.ExecConfig) error {
+		moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
+
 		tagName, _ := gitgo.NewGcm(projectPath, config.GetNewCommand()).LatestGitTag()
 		if tagName != "" {
-			moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
 			zaplog.SUG.Debugln("pkg:", moduleInfo.Module.Path, "tag:", tagName)
-			pkgTagsMap[moduleInfo.Module.Path] = tagName
 		}
+
+		pkgTagsMap[moduleInfo.Module.Path] = tagName
 		return nil
 	}))
 	return pkgTagsMap
