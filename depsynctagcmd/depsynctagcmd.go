@@ -1,4 +1,4 @@
-package depsyncsubcmd
+package depsynctagcmd
 
 import (
 	"github.com/go-mate/depbump"
@@ -13,19 +13,19 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func SyncDepsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "direct",
-		Short: "go module update direct",
-		Long:  "go module update direct",
+		Use:   "sync-tags",
+		Short: "go sync workspace tags",
+		Long:  "go sync workspace tags",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(SyncDeps(config))
+			must.Done(SyncTags(config))
 		},
 	}
 	return cmd
 }
 
-func SyncDeps(config *workconfig.WorkspacesExecConfig) error {
+func SyncTags(config *workconfig.WorkspacesExecConfig) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
 
