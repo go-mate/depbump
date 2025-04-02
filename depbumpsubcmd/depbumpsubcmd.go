@@ -22,8 +22,10 @@ func NewUpdateCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 			UpdateDeps(config)
 		},
 	}
-	cmd.AddCommand(NewUpdateDirectCmd(config))
-	cmd.AddCommand(NewUpdateModuleCmd(config))
+	cmd.AddCommand(NewUpdateDirectCmd(config, "direct"))
+	cmd.AddCommand(NewUpdateDirectCmd(config, "directs"))
+	cmd.AddCommand(NewUpdateModuleCmd(config, "module"))
+	cmd.AddCommand(NewUpdateModuleCmd(config, "modules"))
 	return cmd
 }
 
@@ -82,22 +84,22 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 	return success, nil
 }
 
-func NewUpdateDirectCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func NewUpdateDirectCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "direct",
+		Use:   useName,
 		Short: "go module update direct",
 		Long:  "go module update direct",
 		Run: func(cmd *cobra.Command, args []string) {
 			UpdateDirectDeps(config, false)
 		},
 	}
-	cmd.AddCommand(NewUpdateDirectGetLatestCmd(config))
+	cmd.AddCommand(NewUpdateDirectGetLatestCmd(config, "latest"))
 	return cmd
 }
 
-func NewUpdateDirectGetLatestCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func NewUpdateDirectGetLatestCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "latest",
+		Use:   useName,
 		Short: "go module update direct latest",
 		Long:  "go module update direct latest",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -122,22 +124,22 @@ func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig, getLatest bool) {
 	}
 }
 
-func NewUpdateModuleCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func NewUpdateModuleCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "module",
+		Use:   useName,
 		Short: "go module update module",
 		Long:  "go module update module",
 		Run: func(cmd *cobra.Command, args []string) {
 			UpdateDepModules(config, false)
 		},
 	}
-	cmd.AddCommand(NewUpdateModuleGetLatestCmd(config))
+	cmd.AddCommand(NewUpdateModuleGetLatestCmd(config, "latest"))
 	return cmd
 }
 
-func NewUpdateModuleGetLatestCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func NewUpdateModuleGetLatestCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "latest",
+		Use:   useName,
 		Short: "go module update module latest",
 		Long:  "go module update module latest",
 		Run: func(cmd *cobra.Command, args []string) {
