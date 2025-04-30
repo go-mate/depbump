@@ -2,7 +2,7 @@ package depsynctagcmd
 
 import (
 	"github.com/go-mate/depbump"
-	"github.com/go-mate/go-work/workconfig"
+	"github.com/go-mate/go-work/workcfg"
 	"github.com/go-xlan/gitgo"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/done"
@@ -13,13 +13,13 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func SyncDepsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func SyncDepsCmd(config *workcfg.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "go workspace sync",
 		Long:  "go workspace sync",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachWorkRootRun(func(workspace *workconfig.Workspace, execConfig *osexec.ExecConfig) error {
+			must.Done(config.ForeachWorkRun(func(workspace *workcfg.Workspace, execConfig *osexec.ExecConfig) error {
 				output, err := execConfig.Exec("go", "work", "sync")
 				if err != nil {
 					return erero.Wro(err)
@@ -34,7 +34,7 @@ func SyncDepsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	return cmd
 }
 
-func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func SyncTagsCmd(config *workcfg.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tags",
 		Short: "go workspace sync tags",
@@ -46,7 +46,7 @@ func SyncTagsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	return cmd
 }
 
-func SyncSubsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func SyncSubsCmd(config *workcfg.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subs",
 		Short: "go workspace sync subs",
@@ -58,11 +58,11 @@ func SyncSubsCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	return cmd
 }
 
-func SyncTags(config *workconfig.WorkspacesExecConfig, useLatest bool) error {
+func SyncTags(config *workcfg.WorksExec, useLatest bool) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
 
-	for _, projectPath := range config.CollectSubprojectPaths() {
+	for _, projectPath := range config.Subprojects() {
 		moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
 		zaplog.SUG.Debugln(moduleInfo.Module.Path)
 
@@ -110,9 +110,9 @@ func SyncTags(config *workconfig.WorkspacesExecConfig, useLatest bool) error {
 }
 
 // GetPkgTagsMap 获得若干个模块的最新tag标签
-func GetPkgTagsMap(config *workconfig.WorkspacesExecConfig) map[string]string {
+func GetPkgTagsMap(config *workcfg.WorksExec) map[string]string {
 	pkgTagsMap := make(map[string]string)
-	must.Done(config.ForeachProjectExec(func(projectPath string, execConfig *osexec.ExecConfig) error {
+	must.Done(config.ForeachSubExec(func(projectPath string, execConfig *osexec.ExecConfig) error {
 		moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
 
 		tagName, _ := gitgo.NewGcm(projectPath, config.GetNewCommand()).LatestGitTag()

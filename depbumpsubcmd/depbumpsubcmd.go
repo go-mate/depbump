@@ -2,7 +2,7 @@ package depbumpsubcmd
 
 import (
 	"github.com/go-mate/depbump"
-	"github.com/go-mate/go-work/workconfig"
+	"github.com/go-mate/go-work/workcfg"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/erero"
 	"github.com/yyle88/eroticgo"
@@ -13,7 +13,7 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func NewUpdateCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
+func NewUpdateCmd(config *workcfg.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "go module update -->>",
@@ -29,7 +29,7 @@ func NewUpdateCmd(config *workconfig.WorkspacesExecConfig) *cobra.Command {
 	return cmd
 }
 
-func UpdateDeps(config *workconfig.WorkspacesExecConfig) {
+func UpdateDeps(config *workcfg.WorksExec) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
@@ -84,7 +84,7 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 	return success, nil
 }
 
-func NewUpdateDirectCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
+func NewUpdateDirectCmd(config *workcfg.WorksExec, useName string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   useName,
 		Short: "go module update direct",
@@ -97,7 +97,7 @@ func NewUpdateDirectCmd(config *workconfig.WorkspacesExecConfig, useName string)
 	return cmd
 }
 
-func NewUpdateDirectGetLatestCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
+func NewUpdateDirectGetLatestCmd(config *workcfg.WorksExec, useName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   useName,
 		Short: "go module update direct latest",
@@ -108,7 +108,7 @@ func NewUpdateDirectGetLatestCmd(config *workconfig.WorkspacesExecConfig, useNam
 	}
 }
 
-func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig, getLatest bool) {
+func UpdateDirectDeps(config *workcfg.WorksExec, getLatest bool) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			if getLatest {
@@ -124,7 +124,7 @@ func UpdateDirectDeps(config *workconfig.WorkspacesExecConfig, getLatest bool) {
 	}
 }
 
-func NewUpdateModuleCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
+func NewUpdateModuleCmd(config *workcfg.WorksExec, useName string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   useName,
 		Short: "go module update module",
@@ -137,7 +137,7 @@ func NewUpdateModuleCmd(config *workconfig.WorkspacesExecConfig, useName string)
 	return cmd
 }
 
-func NewUpdateModuleGetLatestCmd(config *workconfig.WorkspacesExecConfig, useName string) *cobra.Command {
+func NewUpdateModuleGetLatestCmd(config *workcfg.WorksExec, useName string) *cobra.Command {
 	return &cobra.Command{
 		Use:   useName,
 		Short: "go module update module latest",
@@ -148,7 +148,7 @@ func NewUpdateModuleGetLatestCmd(config *workconfig.WorkspacesExecConfig, useNam
 	}
 }
 
-func UpdateDepModules(config *workconfig.WorkspacesExecConfig, getLatest bool) {
+func UpdateDepModules(config *workcfg.WorksExec, getLatest bool) {
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
