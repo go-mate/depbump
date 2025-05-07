@@ -19,7 +19,7 @@ func SyncDepsCmd(config *workcfg.WorksExec) *cobra.Command {
 		Short: "go workspace sync",
 		Long:  "go workspace sync",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachWorkRun(func(workspace *workcfg.Workspace, execConfig *osexec.ExecConfig) error {
+			must.Done(config.ForeachWorkRun(func(execConfig *osexec.ExecConfig, workspace *workcfg.Workspace) error {
 				output, err := execConfig.Exec("go", "work", "sync")
 				if err != nil {
 					return erero.Wro(err)
@@ -112,7 +112,7 @@ func SyncTags(config *workcfg.WorksExec, useLatest bool) error {
 // GetPkgTagsMap 获得若干个模块的最新tag标签
 func GetPkgTagsMap(config *workcfg.WorksExec) map[string]string {
 	pkgTagsMap := make(map[string]string)
-	must.Done(config.ForeachSubExec(func(projectPath string, execConfig *osexec.ExecConfig) error {
+	must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
 		moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
 
 		tagName, _ := gitgo.NewGcm(projectPath, config.GetNewCommand()).LatestGitTag()

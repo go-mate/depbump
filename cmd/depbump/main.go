@@ -23,11 +23,13 @@ func main() {
 
 	workspace := workcfg.NewWorkspace("", []string{projectPath})
 
-	commandConfig := osexec.NewCommandConfig()
-	commandConfig.WithBash()
-	commandConfig.WithDebugMode(true)
+	execConfig := osexec.NewCommandConfig()
+	execConfig.WithBash()
+	execConfig.WithDebugMode(true)
 
-	config := workcfg.NewWorksExec([]*workcfg.Workspace{workspace}, commandConfig)
+	workspaces := []*workcfg.Workspace{workspace}
+
+	config := workcfg.NewWorksExec(execConfig, workspaces)
 
 	cmd := depbumpsubcmd.NewUpdateCmd(config)
 	must.Done(cmd.Execute())

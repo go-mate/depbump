@@ -3,7 +3,7 @@ module github.com/go-mate/depbump
 go 1.22.8
 
 require (
-	github.com/go-mate/go-work v0.0.3
+	github.com/go-mate/go-work v0.0.4
 	github.com/go-xlan/gitgo v0.0.16
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -12,12 +12,12 @@ require (
 	github.com/yyle88/eroticgo v0.0.3
 	github.com/yyle88/must v0.0.22
 	github.com/yyle88/neatjson v0.0.12
-	github.com/yyle88/osexec v0.0.27
+	github.com/yyle88/osexec v0.0.28
 	github.com/yyle88/osexistpath v0.0.17
 	github.com/yyle88/rese v0.0.10
 	github.com/yyle88/runpath v1.0.23
 	github.com/yyle88/syntaxgo v0.0.48
-	github.com/yyle88/tern v0.0.7
+	github.com/yyle88/tern v0.0.8
 	github.com/yyle88/zaplog v0.0.22
 	go.uber.org/zap v1.27.0
 	golang.org/x/mod v0.23.0
