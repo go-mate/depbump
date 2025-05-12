@@ -4,7 +4,8 @@ import (
 	"os"
 
 	"github.com/go-mate/depbump/depbumpsubcmd"
-	"github.com/go-mate/go-work/workcfg"
+	"github.com/go-mate/go-work/worksexec"
+	"github.com/go-mate/go-work/workspace"
 	"github.com/yyle88/must"
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/rese"
@@ -21,15 +22,15 @@ func main() {
 	executePath := rese.C1(os.Executable())
 	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
 
-	workspace := workcfg.NewWorkspace("", []string{projectPath})
+	wsp := workspace.NewWorkspace("", []string{projectPath})
 
 	execConfig := osexec.NewCommandConfig()
 	execConfig.WithBash()
 	execConfig.WithDebugMode(true)
 
-	workspaces := []*workcfg.Workspace{workspace}
+	workspaces := []*workspace.Workspace{wsp}
 
-	config := workcfg.NewWorksExec(execConfig, workspaces)
+	config := worksexec.NewWorksExec(execConfig, workspaces)
 
 	cmd := depbumpsubcmd.NewUpdateCmd(config)
 	must.Done(cmd.Execute())

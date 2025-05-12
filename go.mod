@@ -3,14 +3,14 @@ module github.com/go-mate/depbump
 go 1.22.8
 
 require (
-	github.com/go-mate/go-work v0.0.4
+	github.com/go-mate/go-work v0.0.5
 	github.com/go-xlan/gitgo v0.0.16
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yyle88/done v1.0.25
 	github.com/yyle88/erero v1.0.20
 	github.com/yyle88/eroticgo v0.0.3
-	github.com/yyle88/must v0.0.22
+	github.com/yyle88/must v0.0.23
 	github.com/yyle88/neatjson v0.0.12
 	github.com/yyle88/osexec v0.0.28
 	github.com/yyle88/osexistpath v0.0.17

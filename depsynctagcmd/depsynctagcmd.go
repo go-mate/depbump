@@ -2,7 +2,8 @@ package depsynctagcmd
 
 import (
 	"github.com/go-mate/depbump"
-	"github.com/go-mate/go-work/workcfg"
+	"github.com/go-mate/go-work/worksexec"
+	"github.com/go-mate/go-work/workspace"
 	"github.com/go-xlan/gitgo"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/done"
@@ -13,13 +14,13 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func SyncDepsCmd(config *workcfg.WorksExec) *cobra.Command {
+func SyncDepsCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "go workspace sync",
 		Long:  "go workspace sync",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachWorkRun(func(execConfig *osexec.ExecConfig, workspace *workcfg.Workspace) error {
+			must.Done(config.ForeachWorkRun(func(execConfig *osexec.ExecConfig, wsp *workspace.Workspace) error {
 				output, err := execConfig.Exec("go", "work", "sync")
 				if err != nil {
 					return erero.Wro(err)
@@ -34,7 +35,7 @@ func SyncDepsCmd(config *workcfg.WorksExec) *cobra.Command {
 	return cmd
 }
 
-func SyncTagsCmd(config *workcfg.WorksExec) *cobra.Command {
+func SyncTagsCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tags",
 		Short: "go workspace sync tags",
@@ -46,7 +47,7 @@ func SyncTagsCmd(config *workcfg.WorksExec) *cobra.Command {
 	return cmd
 }
 
-func SyncSubsCmd(config *workcfg.WorksExec) *cobra.Command {
+func SyncSubsCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subs",
 		Short: "go workspace sync subs",
@@ -58,7 +59,7 @@ func SyncSubsCmd(config *workcfg.WorksExec) *cobra.Command {
 	return cmd
 }
 
-func SyncTags(config *workcfg.WorksExec, useLatest bool) error {
+func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
 
@@ -110,7 +111,7 @@ func SyncTags(config *workcfg.WorksExec, useLatest bool) error {
 }
 
 // GetPkgTagsMap 获得若干个模块的最新tag标签
-func GetPkgTagsMap(config *workcfg.WorksExec) map[string]string {
+func GetPkgTagsMap(config *worksexec.WorksExec) map[string]string {
 	pkgTagsMap := make(map[string]string)
 	must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
 		moduleInfo := done.VCE(depbump.GetModuleInfo(projectPath)).Nice()
