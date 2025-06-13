@@ -26,7 +26,7 @@ func main() {
 
 	execConfig := osexec.NewCommandConfig()
 	execConfig.WithBash()
-	execConfig.WithDebugMode(true)
+	execConfig.WithDebug()
 
 	workspaces := []*workspace.Workspace{wsp}
 

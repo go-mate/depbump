@@ -34,7 +34,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	})
 	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
 
-	output, err := execConfig.ShallowClone().
+	output, err := execConfig.NewConfig().
 		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {

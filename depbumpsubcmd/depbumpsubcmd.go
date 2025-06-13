@@ -52,7 +52,7 @@ func UpdateDeps(config *worksexec.WorksExec) {
 
 func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain string) (bool, error) {
 	var success = true
-	output, err := execConfig.ShallowClone().
+	output, err := execConfig.NewConfig().
 		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithPath(projectPath).
 		WithMatchMore(true).
@@ -168,9 +168,9 @@ func updateDepModules(execConfig *osexec.ExecConfig, projectPath string, toolcha
 	}
 	if !success {
 		if getLatest {
-			depbump.GetLatestDirectRequires(execConfig.ShallowClone().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			depbump.GetLatestDirectRequires(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
 		} else {
-			depbump.UpdateDirectRequires(execConfig.ShallowClone().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			depbump.UpdateDirectRequires(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
 		}
 	}
 	return nil
