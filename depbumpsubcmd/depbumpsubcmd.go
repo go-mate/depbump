@@ -10,22 +10,28 @@ import (
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/rese"
+	"github.com/yyle88/tern"
 	"github.com/yyle88/zaplog"
 )
+
+var aliasesMap = map[string][]string{
+	"direct":   {"directs"},
+	"everyone": {"require", "requires"},
+	"module":   {"modules"},
+}
 
 func NewUpdateCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "go module update -->>",
-		Long:  "go module update -->>",
+		Short: "depbump -->>",
+		Long:  "depbump -->>",
 		Run: func(cmd *cobra.Command, args []string) {
 			UpdateDeps(config)
 		},
 	}
 	cmd.AddCommand(NewUpdateDirectCmd(config, "direct"))
-	cmd.AddCommand(NewUpdateDirectCmd(config, "directs"))
+	cmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone")) //这不用"all"避免和"all"混淆
 	cmd.AddCommand(NewUpdateModuleCmd(config, "module"))
-	cmd.AddCommand(NewUpdateModuleCmd(config, "modules"))
 	return cmd
 }
 
@@ -42,10 +48,10 @@ func UpdateDeps(config *worksexec.WorksExec) {
 			} else {
 				zaplog.SUG.Warnln("warning", eroticgo.RED.Sprint("warning"))
 			}
-			must.Done(RunGoModTide(config.GetSubCommand(projectPath)))
+			must.Done(GoModTide(config.GetSubCommand(projectPath)))
 		}
 		if wsp.WorkRoot != "" {
-			must.Done(RunGoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
+			must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
 		}
 	}
 }
@@ -57,14 +63,12 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 		WithPath(projectPath).
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
-			upgradeInfo, matched := depbump.MatchUpgrade(line)
-			if matched {
+			if upgradeInfo, matched := depbump.MatchUpgrade(line); matched {
 				zaplog.SUG.Debugln("match-upgrade-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
 				return true
 			}
-			toolchainVersionMismatch, matched := depbump.MatchToolchainVersionMismatch(line)
-			if matched {
-				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(toolchainVersionMismatch)))
+			if waToolchain, matched := depbump.MatchToolchainVersionMismatch(line); matched {
+				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
 				success = false
 				return true
 			}
@@ -84,99 +88,108 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 	return success, nil
 }
 
-func NewUpdateDirectCmd(config *worksexec.WorksExec, useName string) *cobra.Command {
+func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
+	const usageNameLatest = "latest"
+	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
+
 	cmd := &cobra.Command{
-		Use:   useName,
-		Short: "go module update direct",
-		Long:  "go module update direct",
+		Use:     usageName,
+		Aliases: aliasesMap[usageName],
+		Short:   "depbump direct (latest)",
+		Long:    "depbump direct (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDirectDeps(config, false)
-		},
-	}
-	cmd.AddCommand(NewUpdateDirectGetLatestCmd(config, "latest"))
-	return cmd
-}
-
-func NewUpdateDirectGetLatestCmd(config *worksexec.WorksExec, useName string) *cobra.Command {
-	return &cobra.Command{
-		Use:   useName,
-		Short: "go module update direct latest",
-		Long:  "go module update direct latest",
-		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDirectDeps(config, true)
-		},
-	}
-}
-
-func UpdateDirectDeps(config *worksexec.WorksExec, getLatest bool) {
-	for _, wsp := range config.GetWorkspaces() {
-		for _, projectPath := range wsp.Projects {
-			if getLatest {
-				depbump.GetLatestDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
-			} else {
-				depbump.UpdateDirectRequires(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
+			updateDepsConfig := &depbump.UpdateDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: mode,
 			}
-			must.Done(RunGoModTide(config.GetSubCommand(projectPath)))
-		}
-		if wsp.WorkRoot != "" {
-			must.Done(RunGoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
-		}
-	}
-}
-
-func NewUpdateModuleCmd(config *worksexec.WorksExec, useName string) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   useName,
-		Short: "go module update module",
-		Long:  "go module update module",
-		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDepModules(config, false)
+			updateRequires(config, updateDepsConfig)
 		},
 	}
-	cmd.AddCommand(NewUpdateModuleGetLatestCmd(config, "latest"))
+	if usageName != usageNameLatest {
+		cmd.AddCommand(NewUpdateDirectCmd(config, usageNameLatest))
+	}
 	return cmd
 }
 
-func NewUpdateModuleGetLatestCmd(config *worksexec.WorksExec, useName string) *cobra.Command {
-	return &cobra.Command{
-		Use:   useName,
-		Short: "go module update module latest",
-		Long:  "go module update module latest",
+func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
+	const usageNameLatest = "latest"
+	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
+
+	cmd := &cobra.Command{
+		Use:     usageName,
+		Aliases: aliasesMap[usageName],
+		Short:   "depbump require (latest)",
+		Long:    "depbump require (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDepModules(config, true)
+			updateDepsConfig := &depbump.UpdateDepsConfig{
+				Cate: depbump.DepCateEveryone,
+				Mode: mode,
+			}
+			updateRequires(config, updateDepsConfig)
 		},
 	}
+	if usageName != usageNameLatest {
+		cmd.AddCommand(NewUpdateEveryoneCmd(config, usageNameLatest))
+	}
+	return cmd
 }
 
-func UpdateDepModules(config *worksexec.WorksExec, getLatest bool) {
+func updateRequires(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
 	for _, wsp := range config.GetWorkspaces() {
 		for _, projectPath := range wsp.Projects {
-			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
-			must.Done(updateDepModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion(), getLatest))
-			must.Done(RunGoModTide(config.GetSubCommand(projectPath)))
+			depbump.UpdateDeps(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)
+			must.Done(GoModTide(config.GetSubCommand(projectPath)))
 		}
 		if wsp.WorkRoot != "" {
-			must.Done(RunGoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
+			must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
 		}
 	}
 }
 
-func updateDepModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string, getLatest bool) error {
+func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
+	const usageNameLatest = "latest"
+	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
+
+	cmd := &cobra.Command{
+		Use:     usageName,
+		Aliases: aliasesMap[usageName],
+		Short:   "depbump module (latest)",
+		Long:    "depbump module (latest)",
+		Run: func(cmd *cobra.Command, args []string) {
+			updateDepsConfig := &depbump.UpdateDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: mode,
+			}
+			for _, wsp := range config.GetWorkspaces() {
+				for _, projectPath := range wsp.Projects {
+					moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
+					must.Done(updateModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion(), updateDepsConfig))
+					must.Done(GoModTide(config.GetSubCommand(projectPath)))
+				}
+				if wsp.WorkRoot != "" {
+					must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
+				}
+			}
+		},
+	}
+	if usageName != usageNameLatest {
+		cmd.AddCommand(NewUpdateModuleCmd(config, usageNameLatest))
+	}
+	return cmd
+}
+
+func updateModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string, updateDepsConfig *depbump.UpdateDepsConfig) error {
 	success, err := updateDeps(execConfig, projectPath, toolchain)
 	if err != nil {
 		return erero.Wro(err)
 	}
 	if !success {
-		if getLatest {
-			depbump.GetLatestDirectRequires(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
-		} else {
-			depbump.UpdateDirectRequires(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)))
-		}
+		depbump.UpdateDeps(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)
 	}
 	return nil
 }
 
-func RunGoModTide(execConfig *osexec.ExecConfig) error {
+func GoModTide(execConfig *osexec.ExecConfig) error {
 	output, err := execConfig.Exec("go", "mod", "tidy", "-e")
 	if err != nil {
 		if len(output) > 0 {
@@ -188,7 +201,7 @@ func RunGoModTide(execConfig *osexec.ExecConfig) error {
 	return nil
 }
 
-func RunGoWorkSync(execConfig *osexec.ExecConfig) error {
+func GoWorkSync(execConfig *osexec.ExecConfig) error {
 	output, err := execConfig.Exec("go", "work", "sync")
 	if err != nil {
 		if len(output) > 0 {

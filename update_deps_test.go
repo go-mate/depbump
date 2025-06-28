@@ -22,7 +22,7 @@ func TestUpdateModule(t *testing.T) {
 		if !dep.Indirect {
 			require.NoError(t, UpdateModule(execConfig, dep.Path, &UpdateConfig{
 				Toolchain: moduleInfo.GetToolchainVersion(),
-				GetLatest: false,
+				Mode:      GetModeUpdate,
 			}))
 			return // once is enough
 		}

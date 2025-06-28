@@ -12,6 +12,14 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+type DepCate string
+
+const (
+	DepCateDirect   DepCate = "DIRECT"
+	DepCateIndirect DepCate = "INDIRECT"
+	DepCateEveryone DepCate = "EVERYONE"
+)
+
 type Module struct {
 	Path string `json:"Path"`
 }
@@ -36,14 +44,33 @@ func (a *ModuleInfo) GetToolchainVersion() string {
 	})
 }
 
-func (a *ModuleInfo) GetDirectModules() []*Require {
-	var directModules []*Require
+func (a *ModuleInfo) GetDirectRequires() []*Require {
+	var directs []*Require
 	for _, require := range a.Require {
 		if !require.Indirect {
-			directModules = append(directModules, require)
+			directs = append(directs, require)
 		}
 	}
-	return directModules
+	return directs
+}
+
+func (a *ModuleInfo) GetScopedRequires(cate DepCate) []*Require {
+	var results []*Require
+	for _, dep := range a.Require {
+		switch cate {
+		case DepCateDirect:
+			if !dep.Indirect {
+				results = append(results, dep)
+			}
+		case DepCateIndirect:
+			if dep.Indirect {
+				results = append(results, dep)
+			}
+		default:
+			results = append(results, dep)
+		}
+	}
+	return results
 }
 
 func GetModuleInfo(projectPath string) (*ModuleInfo, error) {

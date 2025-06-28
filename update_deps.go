@@ -16,13 +16,25 @@ import (
 	"go.uber.org/zap"
 )
 
+type GetMode string
+
+const (
+	GetModeLatest GetMode = "LATEST"
+	GetModeUpdate GetMode = "UPDATE"
+)
+
+type UpdateConfig struct {
+	Toolchain string
+	Mode      GetMode
+}
+
 func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig *UpdateConfig) error {
 	must.Nice(execConfig)
 	must.Nice(modulePath)
 	must.Nice(updateConfig)
 	must.Nice(updateConfig.Toolchain)
 
-	commands := tern.BFF(updateConfig.GetLatest, func() []string {
+	commands := tern.BFF(updateConfig.Mode == GetModeLatest, func() []string {
 		modulePathLatest := tern.BVF(strings.HasSuffix(modulePath, "@latest"), modulePath, func() string {
 			muststrings.NotContains(modulePath, "@")
 			return modulePath + "@latest"
@@ -38,14 +50,12 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
-			upgradeInfo, matched := MatchUpgrade(line)
-			if matched {
+			if upgradeInfo, matched := MatchUpgrade(line); matched {
 				zaplog.SUG.Debugln("match-upgrade-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
 				return true
 			}
-			toolchainVersionMismatch, matched := MatchToolchainVersionMismatch(line)
-			if matched {
-				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(toolchainVersionMismatch)))
+			if waToolchain, matched := MatchToolchainVersionMismatch(line); matched {
+				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
 				return true
 			}
 			return false
@@ -114,43 +124,17 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 	}, true
 }
 
-func UpdateDirectRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateDeps(execConfig, moduleInfo.GetDirectModules(), &UpdateConfig{
-		Toolchain: moduleInfo.GetToolchainVersion(),
-		GetLatest: false,
-	})
+type UpdateDepsConfig struct {
+	Cate DepCate
+	Mode GetMode
 }
 
-func UpdateRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateDeps(execConfig, moduleInfo.Require, &UpdateConfig{
-		Toolchain: moduleInfo.GetToolchainVersion(),
-		GetLatest: false,
-	})
-}
-
-func GetLatestDirectRequires(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateDeps(execConfig, moduleInfo.GetDirectModules(), &UpdateConfig{
-		Toolchain: moduleInfo.GetToolchainVersion(),
-		GetLatest: true,
-	})
-}
-
-func GetLatestRequests(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo) {
-	UpdateDeps(execConfig, moduleInfo.Require, &UpdateConfig{
-		Toolchain: moduleInfo.GetToolchainVersion(),
-		GetLatest: true,
-	})
-}
-
-type UpdateConfig struct {
-	Toolchain string
-	GetLatest bool
-}
-
-func UpdateDeps(execConfig *osexec.CommandConfig, requires []*Require, updateConfig *UpdateConfig) {
+func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, updateDepsConfig *UpdateDepsConfig) {
 	must.Nice(execConfig)
-	must.Nice(updateConfig)
-	must.Nice(updateConfig.Toolchain)
+	must.Nice(updateDepsConfig)
+
+	toolchainVersion := moduleInfo.GetToolchainVersion()
+	must.Nice(toolchainVersion)
 
 	type Warning struct {
 		Path string `json:"path"`
@@ -158,11 +142,15 @@ func UpdateDeps(execConfig *osexec.CommandConfig, requires []*Require, updateCon
 	}
 
 	var warnings []*Warning
+	requires := moduleInfo.GetScopedRequires(updateDepsConfig.Cate)
 	for idx, dep := range requires {
 		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
 		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
 
-		if err := UpdateModule(execConfig, dep.Path, updateConfig); err != nil {
+		if err := UpdateModule(execConfig, dep.Path, &UpdateConfig{
+			Toolchain: toolchainVersion,
+			Mode:      updateDepsConfig.Mode,
+		}); err != nil {
 			warnings = append(warnings, &Warning{
 				Path: dep.Path,
 				Warn: err.Error(),

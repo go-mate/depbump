@@ -1,4 +1,5 @@
 # depbump
+
 Check and upgrade outdated dependencies in Go modules, with version bumping.
 
 # install
@@ -15,6 +16,10 @@ go install github.com/go-mate/depbump/cmd/depbump-directs@latest
 
 ```bash
 cd project-path && depbump directs
+```
+
+```bash
+cd project-path && depbump everyone
 ```
 
 ```bash

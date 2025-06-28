@@ -22,14 +22,10 @@ func main() {
 	executePath := rese.C1(os.Executable())
 	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
 
-	wsp := workspace.NewWorkspace("", []string{projectPath})
-
-	execConfig := osexec.NewCommandConfig()
-	execConfig.WithBash()
-	execConfig.WithDebug()
-
-	workspaces := []*workspace.Workspace{wsp}
-
+	execConfig := osexec.NewCommandConfig().WithBash().WithDebug()
+	workspaces := []*workspace.Workspace{
+		workspace.NewWorkspace("", []string{projectPath}),
+	}
 	config := worksexec.NewWorksExec(execConfig, workspaces)
 
 	cmd := depbumpsubcmd.NewUpdateCmd(config)

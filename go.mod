@@ -8,7 +8,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yyle88/done v1.0.26
-	github.com/yyle88/erero v1.0.21
+	github.com/yyle88/erero v1.0.23
 	github.com/yyle88/eroticgo v0.0.4
 	github.com/yyle88/must v0.0.25
 	github.com/yyle88/neatjson v0.0.12
@@ -16,9 +16,9 @@ require (
 	github.com/yyle88/osexistpath v0.0.17
 	github.com/yyle88/rese v0.0.10
 	github.com/yyle88/runpath v1.0.23
-	github.com/yyle88/syntaxgo v0.0.52
+	github.com/yyle88/syntaxgo v0.0.53
 	github.com/yyle88/tern v0.0.8
-	github.com/yyle88/zaplog v0.0.24
+	github.com/yyle88/zaplog v0.0.25
 	go.uber.org/zap v1.27.0
 	golang.org/x/mod v0.23.0
 )

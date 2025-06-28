@@ -23,7 +23,10 @@ func main() {
 	zaplog.LOG.Debug("require:", zap.Int("size", len(moduleInfo.Require)))
 
 	execConfig := osexec.NewExecConfig().WithDebug().WithPath(projectPath)
-	depbump.UpdateDirectRequires(execConfig, moduleInfo)
+	depbump.UpdateDeps(execConfig, moduleInfo, &depbump.UpdateDepsConfig{
+		Cate: depbump.DepCateIndirect,
+		Mode: depbump.GetModeUpdate,
+	})
 
-	must.Done(depbumpsubcmd.RunGoModTide(execConfig))
+	must.Done(depbumpsubcmd.GoModTide(execConfig))
 }

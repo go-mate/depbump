@@ -39,9 +39,23 @@ func TestParseModuleFileDemo(t *testing.T) {
 }
 
 func TestParseModuleFile(t *testing.T) {
-	modFile, err := ParseModuleFile(runpath.PARENT.Path())
+	moduleFile, err := ParseModuleFile(runpath.PARENT.Path())
 	require.NoError(t, err)
 
-	t.Log(neatjsons.S(modFile))
-	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), modFile.Module.Mod.Path)
+	t.Log(neatjsons.S(moduleFile))
+	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleFile.Module.Mod.Path)
+}
+
+func TestModuleInfo_GetDirectRequires(t *testing.T) {
+	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
+	require.NoError(t, err)
+	requires := moduleInfo.GetDirectRequires()
+	t.Log(neatjsons.S(requires))
+}
+
+func TestModuleInfo_GetScopedRequires(t *testing.T) {
+	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
+	require.NoError(t, err)
+	requires := moduleInfo.GetScopedRequires(DepCateEveryone)
+	t.Log(neatjsons.S(requires))
 }
