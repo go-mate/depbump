@@ -8,20 +8,20 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 go install github.com/go-mate/depbump/cmd/depbump@latest
 ```
 
-```bash
-go install github.com/go-mate/depbump/cmd/depbump-directs@latest
-```
-
 # command
 
 ```bash
-cd project-path && depbump directs
+cd project-path && depbump
+```
+
+```bash
+cd project-path && depbump direct
+```
+
+```bash
+cd project-path && depbump direct latest
 ```
 
 ```bash
 cd project-path && depbump everyone
-```
-
-```bash
-cd project-path && depbump-directs
 ```

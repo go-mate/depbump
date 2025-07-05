@@ -26,39 +26,44 @@ func NewUpdateCmd(config *worksexec.WorksExec) *cobra.Command {
 		Short: "depbump -->>",
 		Long:  "depbump -->>",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateDeps(config)
+			updateModules(config)
 		},
 	}
+	cmd.AddCommand(NewUpdateModuleCmd(config, "module"))
 	cmd.AddCommand(NewUpdateDirectCmd(config, "direct"))
 	cmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone")) //这不用"all"避免和"all"混淆
-	cmd.AddCommand(NewUpdateModuleCmd(config, "module"))
 	return cmd
 }
 
-func UpdateDeps(config *worksexec.WorksExec) {
-	for _, wsp := range config.GetWorkspaces() {
-		for _, projectPath := range wsp.Projects {
+func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     usageName,
+		Aliases: aliasesMap[usageName],
+		Short:   "depbump module",
+		Long:    "depbump module",
+		Run: func(cmd *cobra.Command, args []string) {
+			updateModules(config)
+		},
+	}
+	return cmd
+}
+
+func updateModules(config *worksexec.WorksExec) {
+	for _, workspace := range config.GetWorkspaces() {
+		for _, projectPath := range workspace.Projects {
 			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
-			success, err := updateDeps(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion())
-			if err != nil {
-				panic(erero.Wro(err))
-			}
-			if success {
-				zaplog.SUG.Infoln("success", eroticgo.RED.Sprint("success"))
-			} else {
-				zaplog.SUG.Warnln("warning", eroticgo.RED.Sprint("warning"))
-			}
+			updateModule(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion())
 			must.Done(GoModTide(config.GetSubCommand(projectPath)))
 		}
-		if wsp.WorkRoot != "" {
-			must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
+		if workspace.WorkRoot != "" {
+			must.Done(GoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
 		}
 	}
 }
 
-func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain string) (bool, error) {
+func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain string) {
 	var success = true
-	output, err := execConfig.NewConfig().
+	output := rese.V1(execConfig.NewConfig().
 		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). //在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithPath(projectPath).
 		WithMatchMore(true).
@@ -67,25 +72,20 @@ func updateDeps(execConfig *osexec.ExecConfig, projectPath string, toolchain str
 				zaplog.SUG.Debugln("match-upgrade-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
 				return true
 			}
-			if waToolchain, matched := depbump.MatchToolchainVersionMismatch(line); matched {
-				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
+			if warnMessage, matched := depbump.MatchToolchainVersionMismatch(line); matched {
+				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(warnMessage)))
 				success = false
 				return true
 			}
 			return false
-		}).ExecInPipe("go", "get", "-u", "./...")
-	if err != nil {
-		if len(output) > 0 {
-			zaplog.SUG.Warnln(string(output))
-		}
-		return false, erero.Wro(err)
-	}
+		}).ExecInPipe("go", "get", "-u", "./..."))
 	if success {
 		zaplog.SUG.Debugln(string(output))
+		zaplog.SUG.Infoln("success", eroticgo.RED.Sprint("success"))
 	} else {
 		zaplog.SUG.Warnln(string(output))
+		zaplog.SUG.Warnln("warning", eroticgo.RED.Sprint("warning"))
 	}
-	return success, nil
 }
 
 func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
@@ -102,7 +102,7 @@ func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string) *cobra.Co
 				Cate: depbump.DepCateDirect,
 				Mode: mode,
 			}
-			updateRequires(config, updateDepsConfig)
+			updateDeps(config, updateDepsConfig)
 		},
 	}
 	if usageName != usageNameLatest {
@@ -125,7 +125,7 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string) *cobra.
 				Cate: depbump.DepCateEveryone,
 				Mode: mode,
 			}
-			updateRequires(config, updateDepsConfig)
+			updateDeps(config, updateDepsConfig)
 		},
 	}
 	if usageName != usageNameLatest {
@@ -134,59 +134,16 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string) *cobra.
 	return cmd
 }
 
-func updateRequires(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
-	for _, wsp := range config.GetWorkspaces() {
-		for _, projectPath := range wsp.Projects {
+func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
+	for _, workspace := range config.GetWorkspaces() {
+		for _, projectPath := range workspace.Projects {
 			depbump.UpdateDeps(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)
 			must.Done(GoModTide(config.GetSubCommand(projectPath)))
 		}
-		if wsp.WorkRoot != "" {
-			must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
+		if workspace.WorkRoot != "" {
+			must.Done(GoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
 		}
 	}
-}
-
-func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
-	const usageNameLatest = "latest"
-	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
-
-	cmd := &cobra.Command{
-		Use:     usageName,
-		Aliases: aliasesMap[usageName],
-		Short:   "depbump module (latest)",
-		Long:    "depbump module (latest)",
-		Run: func(cmd *cobra.Command, args []string) {
-			updateDepsConfig := &depbump.UpdateDepsConfig{
-				Cate: depbump.DepCateDirect,
-				Mode: mode,
-			}
-			for _, wsp := range config.GetWorkspaces() {
-				for _, projectPath := range wsp.Projects {
-					moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
-					must.Done(updateModules(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion(), updateDepsConfig))
-					must.Done(GoModTide(config.GetSubCommand(projectPath)))
-				}
-				if wsp.WorkRoot != "" {
-					must.Done(GoWorkSync(config.GetSubCommand(wsp.WorkRoot)))
-				}
-			}
-		},
-	}
-	if usageName != usageNameLatest {
-		cmd.AddCommand(NewUpdateModuleCmd(config, usageNameLatest))
-	}
-	return cmd
-}
-
-func updateModules(execConfig *osexec.ExecConfig, projectPath string, toolchain string, updateDepsConfig *depbump.UpdateDepsConfig) error {
-	success, err := updateDeps(execConfig, projectPath, toolchain)
-	if err != nil {
-		return erero.Wro(err)
-	}
-	if !success {
-		depbump.UpdateDeps(execConfig.NewConfig().WithPath(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)
-	}
-	return nil
 }
 
 func GoModTide(execConfig *osexec.ExecConfig) error {
