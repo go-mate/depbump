@@ -90,21 +90,22 @@ func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain s
 
 func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
 	const usageNameLatest = "latest"
-	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
 
+	updateDepsConfig := &depbump.UpdateDepsConfig{
+		Cate: depbump.DepCateDirect,
+		Mode: tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
+	}
 	cmd := &cobra.Command{
 		Use:     usageName,
 		Aliases: aliasesMap[usageName],
 		Short:   "depbump direct (latest)",
 		Long:    "depbump direct (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			updateDepsConfig := &depbump.UpdateDepsConfig{
-				Cate: depbump.DepCateDirect,
-				Mode: mode,
-			}
 			updateDeps(config, updateDepsConfig)
 		},
 	}
+	setFlags(cmd, updateDepsConfig)
+
 	if usageName != usageNameLatest {
 		cmd.AddCommand(NewUpdateDirectCmd(config, usageNameLatest))
 	}
@@ -113,28 +114,36 @@ func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string) *cobra.Co
 
 func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string) *cobra.Command {
 	const usageNameLatest = "latest"
-	mode := tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
 
+	updateDepsConfig := &depbump.UpdateDepsConfig{
+		Cate: depbump.DepCateEveryone,
+		Mode: tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
+	}
 	cmd := &cobra.Command{
 		Use:     usageName,
 		Aliases: aliasesMap[usageName],
 		Short:   "depbump require (latest)",
 		Long:    "depbump require (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			updateDepsConfig := &depbump.UpdateDepsConfig{
-				Cate: depbump.DepCateEveryone,
-				Mode: mode,
-			}
 			updateDeps(config, updateDepsConfig)
 		},
 	}
+	setFlags(cmd, updateDepsConfig)
+
 	if usageName != usageNameLatest {
 		cmd.AddCommand(NewUpdateEveryoneCmd(config, usageNameLatest))
 	}
 	return cmd
 }
 
+func setFlags(cmd *cobra.Command, config *depbump.UpdateDepsConfig) {
+	cmd.Flags().BoolVarP(&config.SkipGitlab, "skip-gitlab", "", false, "skip gitlab: skip update gitlab dependencies")
+	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github only: only update github dependencies")
+}
+
 func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
+	zaplog.SUG.Debugln(neatjsons.S(updateDepsConfig))
+
 	for _, workspace := range config.GetWorkspaces() {
 		for _, projectPath := range workspace.Projects {
 			depbump.UpdateDeps(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)

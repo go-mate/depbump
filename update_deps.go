@@ -125,8 +125,10 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 }
 
 type UpdateDepsConfig struct {
-	Cate DepCate
-	Mode GetMode
+	Cate       DepCate
+	Mode       GetMode
+	SkipGitlab bool // 是否不更新 gitlab 的依赖
+	GithubOnly bool // 是否只更新 github 的依赖，其他的都不更新
 }
 
 func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, updateDepsConfig *UpdateDepsConfig) {
@@ -146,6 +148,16 @@ func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, update
 	for idx, dep := range requires {
 		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
 		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
+
+		if updateDepsConfig.SkipGitlab && strings.HasPrefix(dep.Path, "gitlab.") {
+			zaplog.LOG.Debug("skip-gitlab-dep:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			continue
+		}
+
+		if updateDepsConfig.GithubOnly && !strings.HasPrefix(dep.Path, "github.com/") {
+			zaplog.LOG.Debug("skip-non-github:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			continue
+		}
 
 		if err := UpdateModule(execConfig, dep.Path, &UpdateConfig{
 			Toolchain: toolchainVersion,
