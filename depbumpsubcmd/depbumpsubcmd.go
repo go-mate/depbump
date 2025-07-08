@@ -137,8 +137,10 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string) *cobra.
 }
 
 func setFlags(cmd *cobra.Command, config *depbump.UpdateDepsConfig) {
+	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab only: only update gitlab dependencies")
 	cmd.Flags().BoolVarP(&config.SkipGitlab, "skip-gitlab", "", false, "skip gitlab: skip update gitlab dependencies")
 	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github only: only update github dependencies")
+	cmd.Flags().BoolVarP(&config.SkipGithub, "skip-github", "", false, "skip github: skip update github dependencies")
 }
 
 func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {

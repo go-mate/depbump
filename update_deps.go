@@ -127,8 +127,10 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 type UpdateDepsConfig struct {
 	Cate       DepCate
 	Mode       GetMode
+	GitlabOnly bool // 是否只更新 gitlab 的依赖，其他的都不更新
 	SkipGitlab bool // 是否不更新 gitlab 的依赖
 	GithubOnly bool // 是否只更新 github 的依赖，其他的都不更新
+	SkipGithub bool // 是否不更新 github 的依赖
 }
 
 func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, updateDepsConfig *UpdateDepsConfig) {
@@ -149,6 +151,11 @@ func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, update
 		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
 		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
 
+		if updateDepsConfig.GitlabOnly && !strings.HasPrefix(dep.Path, "gitlab.") {
+			zaplog.LOG.Debug("skip-non-gitlab:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			continue
+		}
+
 		if updateDepsConfig.SkipGitlab && strings.HasPrefix(dep.Path, "gitlab.") {
 			zaplog.LOG.Debug("skip-gitlab-dep:", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
@@ -156,6 +163,11 @@ func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, update
 
 		if updateDepsConfig.GithubOnly && !strings.HasPrefix(dep.Path, "github.com/") {
 			zaplog.LOG.Debug("skip-non-github:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			continue
+		}
+
+		if updateDepsConfig.SkipGithub && strings.HasPrefix(dep.Path, "github.com/") {
+			zaplog.LOG.Debug("skip-github-dep:", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
 		}
 
