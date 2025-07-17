@@ -3,7 +3,7 @@ module github.com/go-mate/depbump
 go 1.22.8
 
 require (
-	github.com/go-mate/go-work v0.0.8
+	github.com/go-mate/go-work v0.0.9
 	github.com/go-xlan/gitgo v0.0.17
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -29,10 +29,10 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.7 // indirect
 	github.com/yyle88/mutexmap v1.0.14 // indirect
 	github.com/yyle88/printgo v1.0.5 // indirect
-	github.com/yyle88/sure v0.0.39 // indirect
+	github.com/yyle88/sure v0.0.40 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

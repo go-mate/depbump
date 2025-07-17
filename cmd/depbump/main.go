@@ -4,9 +4,9 @@ import (
 	"os"
 
 	"github.com/go-mate/depbump/depbumpsubcmd"
-	"github.com/go-mate/go-work/modulepath"
 	"github.com/go-mate/go-work/worksexec"
 	"github.com/go-mate/go-work/workspace"
+	"github.com/go-mate/go-work/workspath"
 	"github.com/yyle88/must"
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/rese"
@@ -27,7 +27,7 @@ func main() {
 	executePath := rese.C1(os.Executable())
 	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
 
-	projectPath, _, ok := modulepath.GetProjectPath(currentPath)
+	projectPath, _, ok := workspath.GetProjectPath(currentPath)
 	must.True(ok)
 	zaplog.LOG.Debug("project:", zap.String("path", projectPath))
 	must.Nice(projectPath)
