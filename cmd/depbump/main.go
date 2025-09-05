@@ -1,12 +1,21 @@
+// Package main: depbump command-line tool entry point
+// Provides automatic dependency upgrade and management for Go modules
+// Supports workspace operations and configurable update strategies
+//
+// main: depbump 命令行工具入口点
+// 为 Go 模块提供自动依赖升级和管理功能
+// 支持工作区操作和可配置的更新策略
 package main
 
 import (
 	"os"
 
 	"github.com/go-mate/depbump/depbumpsubcmd"
+	"github.com/go-mate/depbump/depsynctagcmd"
 	"github.com/go-mate/go-work/worksexec"
 	"github.com/go-mate/go-work/workspace"
 	"github.com/go-mate/go-work/workspath"
+	"github.com/spf13/cobra"
 	"github.com/yyle88/must"
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/rese"
@@ -14,12 +23,21 @@ import (
 	"go.uber.org/zap"
 )
 
+// main initializes and executes the depbump command with workspace configuration
+// Sets up project path detection, workspace management, and command execution
+// Supports various update modes: basic, direct, comprehensive with filtering options
+//
+// main 初始化并执行 depbump 命令，配置工作区
+// 设置项目路径检测、工作区管理和命令执行
+// 支持各种更新模式：基础、直接、全部，带过滤选项
+//
+// Usage examples:
 // go run main.go
-// go run main.go directs
-// go run main.go directs --gitlab-only
-// go run main.go directs --skip-gitlab
-// go run main.go directs --github-only
-// go run main.go directs --skip-github
+// go run main.go direct
+// go run main.go direct --gitlab-only
+// go run main.go direct --skip-gitlab
+// go run main.go direct --github-only
+// go run main.go direct --skip-github
 func main() {
 	currentPath := rese.C1(os.Getwd())
 	zaplog.LOG.Debug("current:", zap.String("path", currentPath))
@@ -38,6 +56,17 @@ func main() {
 	}
 	config := worksexec.NewWorksExec(execConfig, workspaces)
 
-	cmd := depbumpsubcmd.NewUpdateCmd(config)
-	must.Done(cmd.Execute())
+	rootCmd := &cobra.Command{
+		Use:   "depbump",
+		Short: "Go dependency management tool",
+		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
+		Run: func(cmd *cobra.Command, args []string) {
+			depbumpsubcmd.UpdateModules(config)
+		},
+	}
+
+	depbumpsubcmd.NewUpdateCmd(rootCmd, config)
+	depsynctagcmd.SetupSyncCmd(rootCmd, config)
+
+	must.Done(rootCmd.Execute())
 }

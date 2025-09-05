@@ -1,3 +1,10 @@
+// Package depsynctagcmd: Git tag synchronization for dependency management
+// Provides commands for syncing dependency versions with Git tags across workspace
+// Supports latest tag resolution and selective dependency synchronization
+//
+// depsynctagcmd: 用于依赖管理的 Git 标签同步
+// 提供在工作区中同步依赖版本与 Git 标签的命令
+// 支持最新标签解析和选择性依赖同步
 package depsynctagcmd
 
 import (
@@ -14,7 +21,12 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-func SyncDepsCmd(config *worksexec.WorksExec) *cobra.Command {
+// SetupSyncCmd creates sync command and adds it to root command
+// Provides basic go work sync functionality and tag-based synchronization subcommands
+//
+// SetupSyncCmd 创建同步命令并添加到根命令
+// 提供基本的 go work sync 功能和基于标签的同步子命令
+func SetupSyncCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "go workspace sync",
@@ -32,9 +44,15 @@ func SyncDepsCmd(config *worksexec.WorksExec) *cobra.Command {
 	}
 	cmd.AddCommand(SyncTagsCmd(config))
 	cmd.AddCommand(SyncSubsCmd(config))
-	return cmd
+
+	rootCmd.AddCommand(cmd)
 }
 
+// SyncTagsCmd creates command for synchronizing dependencies to their latest Git tags
+// Updates dependencies to match their corresponding Git tag versions
+//
+// SyncTagsCmd 创建用于将依赖同步到最新 Git 标签的命令
+// 更新依赖以匹配其相应的 Git 标签版本
 func SyncTagsCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tags",
@@ -47,6 +65,11 @@ func SyncTagsCmd(config *worksexec.WorksExec) *cobra.Command {
 	return cmd
 }
 
+// SyncSubsCmd creates command for syncing dependencies with latest tag fallback
+// Uses latest tag when no specific tag is available for dependencies
+//
+// SyncSubsCmd 创建用于同步依赖的命令，带有最新标签回退
+// 当依赖没有特定标签时使用最新标签
 func SyncSubsCmd(config *worksexec.WorksExec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subs",
@@ -59,6 +82,11 @@ func SyncSubsCmd(config *worksexec.WorksExec) *cobra.Command {
 	return cmd
 }
 
+// SyncTags performs Git tag-based dependency synchronization across workspace
+// Compares current dependency versions with Git tags and updates when different
+//
+// SyncTags 在工作区中执行基于 Git 标签的依赖同步
+// 比较当前依赖版本与 Git 标签，在不同时进行更新
 func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 	pkgTagsMap := GetPkgTagsMap(config)
 	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
@@ -78,7 +106,7 @@ func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 			}
 			if pkgTag == "" {
 				if useLatest {
-					pkgTag = "latest" // 假如没有 tag 版本号，则默认为 latest 的
+					pkgTag = "latest" // Use "latest" when no tag version exists // 当没有标签版本时使用 "latest"
 				} else {
 					continue
 				}
@@ -90,12 +118,19 @@ func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 			}
 			zaplog.SUG.Debugln(projectPath, module.Path, module.Version, "sync", "=>", pkgTag)
 
+			// Example command execution patterns:
 			// GOTOOLCHAIN=go1.22.8 go get -u github.com/yyle88/syntaxgo@v0.0.45
 			// go: golang.org/x/exp@v0.0.0-20250218142911-aa4b98e5adaa requires go >= 1.23.0 (running go 1.22.8; GOTOOLCHAIN=go1.22.8)
-			// 因此正确的做法是不带 -u 选项
+			// Correct approach: omit -u option to avoid version conflicts
 			// GOTOOLCHAIN=go1.22.8 go get github.com/yyle88/syntaxgo@v0.0.45
 			// go: upgraded github.com/yyle88/syntaxgo v0.0.44 => v0.0.45
-			// 这里需要注意
+			//
+			// 命令执行模式示例：
+			// GOTOOLCHAIN=go1.22.8 go get -u github.com/yyle88/syntaxgo@v0.0.45
+			// go: golang.org/x/exp@v0.0.0-20250218142911-aa4b98e5adaa requires go >= 1.23.0 (running go 1.22.8; GOTOOLCHAIN=go1.22.8)
+			// 正确的做法：省略 -u 选项以避免版本冲突
+			// GOTOOLCHAIN=go1.22.8 go get github.com/yyle88/syntaxgo@v0.0.45
+			// go: upgraded github.com/yyle88/syntaxgo v0.0.44 => v0.0.45
 			output, err := config.GetSubCommand(projectPath).Exec("go", "get", module.Path+"@"+pkgTag)
 			if err != nil {
 				return erero.Wro(err)
@@ -110,7 +145,11 @@ func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 	return nil
 }
 
-// GetPkgTagsMap 获得若干个模块的最新tag标签
+// GetPkgTagsMap retrieves latest Git tags for all modules in the workspace
+// Creates a mapping from module paths to their corresponding Git tag versions
+//
+// GetPkgTagsMap 获取工作区中所有模块的最新 Git 标签
+// 创建从模块路径到其相应 Git 标签版本的映射
 func GetPkgTagsMap(config *worksexec.WorksExec) map[string]string {
 	pkgTagsMap := make(map[string]string)
 	must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {

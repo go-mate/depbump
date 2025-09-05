@@ -1,3 +1,10 @@
+// Package depbump tests: Module dependency parsing and analysis test suite
+// Tests module information retrieval, go.mod parsing, and dependency filtering functions
+// Validates module path detection, toolchain configuration, and scoped requirement filtering
+//
+// depbump 测试包：模块依赖解析和分析测试套件
+// 测试模块信息检索、go.mod 解析和依赖过滤功能
+// 验证模块路径检测、工具链配置和作用域需求过滤
 package depbump
 
 import (
@@ -12,6 +19,11 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+// TestGetModuleInfo validates module information parsing from go mod edit -json
+// Tests JSON unmarshaling, module path extraction, and Go version detection
+//
+// TestGetModuleInfo 验证从 go mod edit -json 解析模块信息
+// 测试 JSON 解组、模块路径提取和 Go 版本检测
 func TestGetModuleInfo(t *testing.T) {
 	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
 	require.NoError(t, err)
@@ -23,6 +35,11 @@ func TestGetModuleInfo(t *testing.T) {
 	t.Log(moduleInfo.Go)
 }
 
+// TestParseModuleFileDemo demonstrates direct go.mod file parsing using modfile library
+// Tests file reading, parsing, and module path validation with explicit file operations
+//
+// TestParseModuleFileDemo 演示使用 modfile 库直接解析 go.mod 文件
+// 测试文件读取、解析和模块路径验证，带显式文件操作
 func TestParseModuleFileDemo(t *testing.T) {
 	const fileName = "go.mod"
 	modPath := osmustexist.FILE(runpath.PARENT.Join(fileName))
@@ -38,6 +55,11 @@ func TestParseModuleFileDemo(t *testing.T) {
 	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), modFile.Module.Mod.Path)
 }
 
+// TestParseModuleFile tests the ParseModuleFile utility function wrapper
+// Validates encapsulated file path handling and module parsing functionality
+//
+// TestParseModuleFile 测试 ParseModuleFile 工具函数包装器
+// 验证封装的文件路径处理和模块解析功能
 func TestParseModuleFile(t *testing.T) {
 	moduleFile, err := ParseModuleFile(runpath.PARENT.Path())
 	require.NoError(t, err)
@@ -46,6 +68,11 @@ func TestParseModuleFile(t *testing.T) {
 	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleFile.Module.Mod.Path)
 }
 
+// TestModuleInfo_GetDirectRequires tests filtering for direct (non-indirect) dependencies
+// Validates that indirect dependencies are properly excluded from the result set
+//
+// TestModuleInfo_GetDirectRequires 测试过滤直接（非间接）依赖
+// 验证间接依赖被正确排除在结果集之外
 func TestModuleInfo_GetDirectRequires(t *testing.T) {
 	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
 	require.NoError(t, err)
@@ -53,6 +80,11 @@ func TestModuleInfo_GetDirectRequires(t *testing.T) {
 	t.Log(neatjsons.S(requires))
 }
 
+// TestModuleInfo_GetScopedRequires tests dependency filtering by category scope
+// Validates filtering logic for direct, indirect, and all dependency categories
+//
+// TestModuleInfo_GetScopedRequires 测试按类别范围过滤依赖
+// 验证直接、间接和所有依赖类别的过滤逻辑
 func TestModuleInfo_GetScopedRequires(t *testing.T) {
 	moduleInfo, err := GetModuleInfo(runpath.PARENT.Path())
 	require.NoError(t, err)
