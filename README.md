@@ -1,3 +1,10 @@
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
+[![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.22+-lightgrey.svg)](https://go.dev/)
+[![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
+
 # depbump
 
 Check and upgrade outdated dependencies in Go modules, with version bumping.
@@ -10,13 +17,14 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 [中文说明](README.zh.md)
 <!-- TEMPLATE (EN) END: LANGUAGE NAVIGATION -->
 
-## Key Features
+## Main Features
 
-🔄 **Smart Dependency Upgrades**: Auto detect and upgrade outdated Go module dependencies  
-⚡ **Multiple Update Strategies**: Support direct, indirect, and all dependency updates  
-🎯 **Version Control Integration**: Git tag synchronization for consistent dependency versions  
-🌍 **Source Filtering**: Selective updates for GitHub/GitLab sources  
-📋 **Workspace Support**: Go workspace multi-module batch dependency management
+🔄 **Smart Package Upgrades**: Auto detect and upgrade outdated Go module packages
+⚡ **Multiple Update Strategies**: Support direct, indirect, and package updates
+🧠 **Go Version Matching**: Intelligent analysis prevents toolchain contagion during upgrades
+🎯 **Version Management Integration**: Git tag synchronization for consistent package versions
+🌍 **Source Filtering**: Selective updates for GitHub/GitLab sources
+📋 **Workspace Support**: Go workspace multi-module batch package management
 
 ## Install
 
@@ -35,29 +43,29 @@ cd project-path && depbump
 # Update module dependencies (same as above, explicit)
 cd project-path && depbump module
 
-# Update direct dependencies only
+# Update direct packages
 cd project-path && depbump direct
 
 # Update direct dependencies to latest versions
 cd project-path && depbump direct latest
 
-# Update every dependency
+# Update each package
 cd project-path && depbump everyone
 
-# Update every dependency to latest versions  
+# Update each package to latest versions  
 cd project-path && depbump everyone latest
 ```
 
 ### Advanced Usage
 
 ```bash
-# Update only GitHub dependencies
+# Update GitHub packages
 depbump direct --github-only
 
 # Skip GitLab dependencies
 depbump direct --skip-gitlab
 
-# Update only GitLab dependencies
+# Update GitLab packages
 depbump direct --gitlab-only
 
 # Skip GitHub dependencies
@@ -73,43 +81,61 @@ depbump sync tags
 depbump sync subs
 ```
 
-### Dependency Categories
+### Intelligent Package Management
+
+```bash
+# Smart Go version matching checks and upgrades
+# Prevents Go toolchain contagion while upgrading dependencies
+depbump bump
+
+# Works in workspace environment (processes all modules)
+cd workspace-root && depbump bump
+```
+
+**New `bump` Command Features:**
+- 🧠 **Go Version Matching**: Analyzes each package's Go version requirements
+- 🚫 **Toolchain Contagion Prevention**: Avoids upgrades that would force toolchain changes
+- ⬆️ **Upgrade-First Approach**: Does not downgrade existing packages
+- 📊 **Intelligent Analysis**: Shows version transitions with Go version requirements
+- 🔄 **Workspace Integration**: Processes multiple Go modules well
+
+### Package Categories
 
 - **module**: Update module dependencies using `go get -u ./...`
-- **direct**: Update only direct (explicit) dependencies declared in go.mod  
-- **everyone**: Update every dependency - aliases: `require`, `requires`
-- **latest**: Get latest available versions (may have breaking changes)
+- **direct**: Update direct (explicit) packages declared in go.mod  
+- **everyone**: Update each package - aliases: `require`, `requires`
+- **latest**: Get latest available versions (might have breaking changes)
 - **update**: Get compatible updates (respects semantic versioning)
 
 ### Source Filtering Options
 
-- `--github-only`: Update only GitHub-hosted dependencies
+- `--github-only`: Update GitHub-hosted packages
 - `--skip-github`: Skip GitHub-hosted dependencies
-- `--gitlab-only`: Update only GitLab-hosted dependencies
+- `--gitlab-only`: Update GitLab-hosted packages
 - `--skip-gitlab`: Skip GitLab-hosted dependencies
 
 ## Features
 
-### Smart Dependency Management
+### Smart Package Management
 
-depbump provides intelligent dependency management that can:
-- Auto parse dependency information from `go.mod` files
+depbump provides intelligent package management that can:
+- Auto parse package information from `go.mod` files
 - Detect available upgrade versions
-- Handle version compatibility issues
+- Handle version matching issues
 - Support Go toolchain version management
 
 ### Workspace Integration
 
 Supports Go 1.18+ workspace features:
-- Auto discover all modules in workspace
-- Batch process dependency updates for multiple modules
-- Maintain consistency across workspace dependencies
+- Auto find modules in workspace
+- Batch process package updates for multiple modules
+- Keep consistency across workspace packages
 - Auto execute `go work sync`
 
 ### Git Tag Synchronization
 
-Provides Git tag integration functionality:
-- Sync dependency versions to corresponding Git tags
+Provides Git tag integration features:
+- Sync package versions to corresponding Git tags
 - Support tag version verification
 - Handle missing tag scenarios
 
@@ -154,9 +180,9 @@ depbump sync subs
 
 ```bash
 # GitHub/GitLab specific updates
-depbump direct --github-only      # Only GitHub dependencies
+depbump direct --github-only      # GitHub packages
 depbump direct --skip-github      # Skip GitHub dependencies
-depbump direct --gitlab-only      # Only GitLab dependencies
+depbump direct --gitlab-only      # GitLab packages
 depbump direct --skip-gitlab      # Skip GitLab dependencies
 
 # Combine with latest mode
@@ -169,33 +195,33 @@ depbump everyone latest --skip-gitlab
 ### Common Issues
 
 1. **Toolchain Version Mismatch**
-   - depbump automatically manages Go toolchain versions
-   - Uses project's Go version from go.mod to ensure compatibility
+   - depbump manages Go toolchain versions
+   - Uses project's Go version from go.mod to ensure matching
    - Set GOTOOLCHAIN environment variable if needed
 
-2. **Dependency Conflicts**
-   - Run `go mod tidy -e` after updates to clean up
-   - Use `depbump direct` instead of `depbump everyone` for safer updates
+2. **Package Conflicts**
+   - Run `go mod tidy -e` following updates to clean up
+   - Use `depbump direct` instead of `depbump everyone` for safe updates
    - Check go.mod for incompatible version constraints
 
 3. **Workspace Issues**
    - Ensure go.work file exists for workspace commands
    - Run `depbump sync` to synchronize workspace dependencies
-   - Check that all modules are properly listed in go.work
+   - Check that modules are listed in go.work
 
 ## Tips and Best Practices
 
-- **Start with direct dependencies**: Use `depbump direct` for safer updates
-- **Test after updates**: Always run tests after dependency updates
-- **Use version control**: Commit go.mod/go.sum before major updates
-- **Incremental updates**: Update dependencies gradually, not all at once
-- **Monitor breaking changes**: Use `depbump direct` (compatible) before `depbump direct latest`
-- **Workspace consistency**: Run `depbump sync` after module updates in workspaces
+- **Start with direct packages**: Use `depbump direct` for safe updates
+- **Test updates**: Run tests when updating packages
+- **Use version management**: Commit go.mod/go.sum before big updates
+- **Step-wise updates**: Update packages in steps, not at once
+- **Watch breaking changes**: Use `depbump direct` (matching) before `depbump direct latest`
+- **Workspace sync**: Run `depbump sync` when updating modules in workspaces
 
 ---
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-08-28 08:33:43.829511 +0000 UTC -->
+<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
 
 ## 📄 License
 
@@ -210,12 +236,12 @@ Contributions are welcome! Report bugs, suggest features, and contribute code:
 - 🐛 **Found a bug?** Open an issue on GitHub with reproduction steps
 - 💡 **Have a feature idea?** Create an issue to discuss the suggestion
 - 📖 **Documentation confusing?** Report it so we can improve
-- 🚀 **Need new features?** Share your use cases to help us understand requirements
-- ⚡ **Performance issue?** Help us optimize by reporting slow operations
+- 🚀 **Need new features?** Share the use cases to help us understand requirements
+- ⚡ **Performance issue?** Help us optimize through reporting slow operations
 - 🔧 **Configuration problem?** Ask questions about complex setups
-- 📢 **Follow project progress?** Watch the repo for new releases and features
-- 🌟 **Success stories?** Share how this package improved your workflow
-- 💬 **General feedback?** All suggestions and comments are welcome
+- 📢 **Follow project progress?** Watch the repo to get new releases and features
+- 🌟 **Success stories?** Share how this package improved the workflow
+- 💬 **Feedback?** We welcome suggestions and comments
 
 ---
 
@@ -223,13 +249,13 @@ Contributions are welcome! Report bugs, suggest features, and contribute code:
 
 New code contributions, follow this process:
 
-1. **Fork**: Fork the repo on GitHub (using the webpage interface).
+1. **Fork**: Fork the repo on GitHub (using the webpage UI).
 2. **Clone**: Clone the forked project (`git clone https://github.com/yourname/repo-name.git`).
 3. **Navigate**: Navigate to the cloned project (`cd repo-name`)
 4. **Branch**: Create a feature branch (`git checkout -b feature/xxx`).
-5. **Code**: Implement your changes with comprehensive tests
+5. **Code**: Implement the changes with comprehensive tests
 6. **Testing**: (Golang project) Ensure tests pass (`go test ./...`) and follow Go code style conventions
-7. **Documentation**: Update documentation for user-facing changes and use meaningful commit messages
+7. **Documentation**: Update documentation to support client-facing changes and use significant commit messages
 8. **Stage**: Stage changes (`git add .`)
 9. **Commit**: Commit changes (`git commit -m "Add feature xxx"`) ensuring backward compatible code
 10. **Push**: Push to the branch (`git push origin feature/xxx`).
@@ -241,7 +267,7 @@ Please ensure tests pass and include relevant documentation updates.
 
 ## 🌟 Support
 
-Welcome to contribute to this project by submitting pull requests and reporting issues.
+Welcome to contribute to this project via submitting merge requests and reporting issues.
 
 **Project Support:**
 
@@ -250,7 +276,7 @@ Welcome to contribute to this project by submitting pull requests and reporting 
 - 📝 **Write tech blogs** about development tools and workflows - we provide content writing support
 - 🌟 **Join the ecosystem** - committed to supporting open source and the (golang) development scene
 
-**Happy Coding with this package!** 🎉
+**Have Fun Coding with this package!** 🎉
 
 <!-- TEMPLATE (EN) END: STANDARD PROJECT FOOTER -->
 

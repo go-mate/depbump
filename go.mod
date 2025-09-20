@@ -4,7 +4,7 @@ go 1.22.8
 
 require (
 	github.com/go-mate/go-work v0.0.11
-	github.com/go-xlan/gitgo v0.0.17
+	github.com/go-xlan/gitgo v0.0.18
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
 	github.com/yyle88/done v1.0.27
@@ -13,12 +13,12 @@ require (
 	github.com/yyle88/must v0.0.26
 	github.com/yyle88/neatjson v0.0.12
 	github.com/yyle88/osexec v0.0.32
-	github.com/yyle88/osexistpath v0.0.17
+	github.com/yyle88/osexistpath v0.0.18
 	github.com/yyle88/rese v0.0.11
 	github.com/yyle88/runpath v1.0.24
 	github.com/yyle88/syntaxgo v0.0.53
-	github.com/yyle88/tern v0.0.8
-	github.com/yyle88/zaplog v0.0.26
+	github.com/yyle88/tern v0.0.9
+	github.com/yyle88/zaplog v0.0.27
 	go.uber.org/zap v1.27.0
 	golang.org/x/mod v0.23.0
 )

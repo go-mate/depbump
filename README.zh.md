@@ -1,3 +1,10 @@
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
+[![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
+[![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.22+-lightgrey.svg)](https://go.dev/)
+[![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
+
 # depbump
 
 检查并升级 Go 模块中的过时依赖，支持版本升级功能。
@@ -12,11 +19,12 @@
 
 ## 核心特性
 
-🔄 **智能依赖升级**: 自动检测和升级过时的 Go 模块依赖  
-⚡ **多种更新策略**: 支持直接依赖、间接依赖和全部依赖更新  
-🎯 **版本控制集成**: 集成 Git 标签同步，确保依赖版本一致性  
-🌍 **源过滤支持**: 支持 GitHub/GitLab 源的选择性更新  
-📋 **工作区支持**: 支持 Go workspace 跨模块批量依赖管理
+🔄 **智能包升级**: 自动检测和升级过时的 Go 模块包
+⚡ **多种更新策略**: 支持直接包、间接包和全部包更新
+🧠 **Go 版本匹配**: 智能分析防止升级过程中的工具链传染
+🎯 **版本管理集成**: 集成 Git 标签同步，确保包版本一致性
+🌍 **源过滤支持**: 支持 GitHub/GitLab 源的选择性更新
+📋 **工作区支持**: 支持 Go workspace 跨模块批量包管理
 
 ## 安装
 
@@ -72,6 +80,24 @@ depbump sync tags
 # 同步依赖，缺失标签时使用最新版本
 depbump sync subs
 ```
+
+### 智能依赖管理
+
+```bash
+# 智能 Go 版本兼容性检查和升级
+# 防止升级依赖时的 Go 工具链传染
+depbump bump
+
+# 在工作区环境中工作（处理所有模块）
+cd workspace-root && depbump bump
+```
+
+**新增 `bump` 命令特性：**
+- 🧠 **Go 版本兼容性**: 分析每个依赖的 Go 版本要求
+- 🚫 **工具链传染防护**: 避免强制工具链变更的升级
+- ⬆️ **仅升级策略**: 永不降级现有依赖
+- 📊 **智能分析**: 显示版本转换和 Go 版本要求
+- 🔄 **工作区集成**: 高效处理多个 Go 模块
 
 ### 依赖类别
 
@@ -195,7 +221,7 @@ depbump everyone latest --skip-gitlab
 ---
 
 <!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-08-28 08:33:43.829511 +0000 UTC -->
+<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
 
 ## 📄 许可证类型
 
@@ -215,7 +241,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 - 🔧 **配置困扰？** 询问复杂设置的相关问题
 - 📢 **关注进展？** 关注仓库以获取新版本和功能
 - 🌟 **成功案例？** 分享这个包如何改善工作流程
-- 💬 **意见反馈？** 欢迎所有建议和宝贵意见
+- 💬 **反馈意见？** 欢迎提出建议和意见
 
 ---
 
@@ -250,7 +276,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 - 📝 **撰写博客**关于开发工具和工作流程 - 我们提供写作支持
 - 🌟 **加入生态** - 致力于支持开源和（golang）开发场景
 
-**使用这个包快乐编程！** 🎉
+**祝你用这个包编程愉快！** 🎉
 
 <!-- TEMPLATE (ZH) END: STANDARD PROJECT FOOTER -->
 
