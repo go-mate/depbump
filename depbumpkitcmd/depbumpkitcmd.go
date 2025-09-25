@@ -285,9 +285,10 @@ func (c *BumpKit) GetPackageGoRequirement(pkgPath, version string) string {
 	must.Done(json.Unmarshal(output, &modInfo))
 
 	var goReq string
+	const defaultVersion = "1.0.0"
 	if modInfo.GoMod == "" {
 		// No go.mod file, use default version // 没有 go.mod 文件，使用默认版本
-		goReq = "1.0.0"
+		goReq = defaultVersion
 	} else {
 		// Parse downloaded go.mod file // 解析下载的 go.mod 文件
 		modData := rese.A1(os.ReadFile(modInfo.GoMod))
@@ -297,8 +298,11 @@ func (c *BumpKit) GetPackageGoRequirement(pkgPath, version string) string {
 		// 获取有效的工具链版本，考虑 toolchain 传染
 		if modFile.Toolchain != nil {
 			goReq = strings.TrimPrefix(modFile.Toolchain.Name, "go")
+		} else if modFile.Go != nil {
+			goReq = must.Nice(modFile.Go.Version)
 		} else {
-			goReq = must.Nice(must.Full(modFile.Go).Version)
+			// No go directive in go.mod, use default version // go.mod 中没有 go 指令，使用默认版本
+			goReq = defaultVersion
 		}
 	}
 	c.MapDepGoVersion[cacheKey] = goReq

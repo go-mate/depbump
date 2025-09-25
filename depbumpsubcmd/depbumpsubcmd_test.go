@@ -1,4 +1,4 @@
-// Package depbumpsubcmd tests: CLI command functionality test suite
+// Package depbumpsubcmd tests: CLI command function test suite
 // Tests Cobra command creation, flag configuration, and workspace execution
 // Validates command-line interface behavior and subcommand organization
 //

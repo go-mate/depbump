@@ -1,6 +1,6 @@
-// Package depbump: Go module dependency management and upgrade automation
-// Provides comprehensive tools for analyzing, updating, and managing Go module dependencies
-// Supports both direct and indirect dependency handling with version control integration
+// Package depbump: Go module dep management and upgrade automation
+// Provides comprehensive tools for analyzing, updating, and managing Go module deps
+// Supports both direct and indirect dep handling with version management integration
 //
 // depbump: Go 模块依赖管理和升级自动化
 // 提供全面的工具来分析、更新和管理 Go 模块依赖
@@ -41,18 +41,18 @@ type Module struct {
 	Path string `json:"Path"` // Module path // 模块路径
 }
 
-// Require represents a single dependency requirement
-// Contains dependency path, version, and indirect status
+// Require represents a single dep requirement
+// Contains dep path, version, and indirect status
 //
 // Require 代表单个依赖需求
 // 包含依赖路径、版本和间接状态
 type Require struct {
-	Path     string `json:"Path"`     // Dependency path // 依赖路径
+	Path     string `json:"Path"`     // Dep path // 依赖路径
 	Version  string `json:"Version"`  // Current version // 当前版本
-	Indirect bool   `json:"Indirect"` // Whether indirect dependency // 是否为间接依赖
+	Indirect bool   `json:"Indirect"` // Whether indirect dep // 是否为间接依赖
 }
 
-// ModuleInfo contains complete module dependency information
+// ModuleInfo contains complete module dep information
 // Parsed from go mod edit -json output with toolchain details
 //
 // ModuleInfo 包含完整的模块依赖信息

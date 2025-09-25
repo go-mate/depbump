@@ -1,5 +1,5 @@
-// Package depbump tests: Module dependency parsing and analysis test suite
-// Tests module information retrieval, go.mod parsing, and dependency filtering functions
+// Package depbump tests: Module dep parsing and analysis test suite
+// Tests module information fetch, go.mod parsing, and dep filtering functions
 // Validates module path detection, toolchain configuration, and scoped requirement filtering
 //
 // depbump 测试包：模块依赖解析和分析测试套件
@@ -35,7 +35,7 @@ func TestGetModuleInfo(t *testing.T) {
 	t.Log(moduleInfo.Go)
 }
 
-// TestParseModuleFileDemo demonstrates direct go.mod file parsing using modfile library
+// TestParseModuleFileDemo demonstrates direct go.mod file parsing using modfile lib
 // Tests file reading, parsing, and module path validation with explicit file operations
 //
 // TestParseModuleFileDemo 演示使用 modfile 库直接解析 go.mod 文件
@@ -56,7 +56,7 @@ func TestParseModuleFileDemo(t *testing.T) {
 }
 
 // TestParseModuleFile tests the ParseModuleFile utility function wrapper
-// Validates encapsulated file path handling and module parsing functionality
+// Validates encapsulated file path handling and module parsing function
 //
 // TestParseModuleFile 测试 ParseModuleFile 工具函数包装器
 // 验证封装的文件路径处理和模块解析功能
@@ -80,8 +80,8 @@ func TestModuleInfo_GetDirectRequires(t *testing.T) {
 	t.Log(neatjsons.S(requires))
 }
 
-// TestModuleInfo_GetScopedRequires tests dependency filtering by category scope
-// Validates filtering logic for direct, indirect, and all dependency categories
+// TestModuleInfo_GetScopedRequires tests dep filtering by type scope
+// Validates filtering logic for direct, indirect, and all dep types
 //
 // TestModuleInfo_GetScopedRequires 测试按类别范围过滤依赖
 // 验证直接、间接和所有依赖类别的过滤逻辑

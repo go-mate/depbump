@@ -1,5 +1,5 @@
-// Package depbumpsubcmd: Command-line interface for dependency bump operations
-// Provides Cobra-based CLI commands for module, direct, and comprehensive dependency updates
+// Package depbumpsubcmd: Command-line interface to bump deps
+// Provides Cobra-based CLI commands for module, direct, and comprehensive dep updates
 // Supports workspace operations with configurable filtering and update strategies
 //
 // depbumpsubcmd: 依赖升级操作的命令行接口
@@ -56,7 +56,7 @@ func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 }
 
 // NewUpdateModuleCmd creates a command for updating Go modules in workspace
-// Provides module-specific update functionality with configurable usage name
+// Provides module-specific update function with configurable usage name
 //
 // NewUpdateModuleCmd 创建用于更新工作区中 Go 模块的命令
 // 提供特定于模块的更新功能，带可配置的用法名称
@@ -74,7 +74,7 @@ func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string) *cobra.Co
 }
 
 // UpdateModules performs comprehensive module updates across all workspaces
-// Handles module info retrieval, toolchain detection, and cleanup operations
+// Handles module info fetch, toolchain detection, and cleanup operations
 //
 // UpdateModules 在所有工作区中执行全面的模块更新
 // 处理模块信息检索、工具链检测和清理操作
@@ -110,6 +110,10 @@ func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain s
 			if warnMessage, matched := depbump.MatchToolchainVersionMismatch(line); matched {
 				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(warnMessage)))
 				success = false
+				return true
+			}
+			if sdkInfo, matched := depbump.MatchGoDownloadingSdkInfo(line); matched {
+				zaplog.SUG.Debugln("go-downloading-sdk-info:", eroticgo.CYAN.Sprint(neatjsons.S(sdkInfo)))
 				return true
 			}
 			return false

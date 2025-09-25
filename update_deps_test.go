@@ -1,6 +1,6 @@
-// Package depbump tests: Dependency update functionality test suite
+// Package depbump tests: Dep update function test suite
 // Tests module update operations, toolchain version handling, and configuration validation
-// Validates go get command execution and dependency upgrade behavior
+// Validates go get command execution and dep upgrade action
 //
 // depbump 测试包：依赖更新功能测试套件
 // 测试模块更新操作、工具链版本处理和配置验证
@@ -16,8 +16,8 @@ import (
 	"github.com/yyle88/syntaxgo/syntaxgo_reflect"
 )
 
-// TestUpdateModule validates single module dependency update functionality
-// Tests toolchain configuration, update mode handling, and direct dependency processing
+// TestUpdateModule validates single module dep update function
+// Tests toolchain configuration, update mode handling, and direct dep processing
 //
 // TestUpdateModule 验证单个模块依赖更新功能
 // 测试工具链配置、更新模式处理和直接依赖处理

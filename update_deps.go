@@ -1,5 +1,5 @@
-// Package depbump: Advanced dependency update engine with version control
-// Implements intelligent dependency upgrading with toolchain management
+// Package depbump: Advanced dep update engine with version management
+// Implements intelligent dep upgrading with toolchain management
 // Supports pattern matching for upgrade output and error diagnostics
 //
 // depbump: 高级依赖更新引擎，带版本控制
@@ -23,7 +23,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetMode defines the strategy for dependency version acquisition
+// GetMode defines the approach to get dep versions
 // Latest mode gets the newest available version, Update mode gets compatible upgrades
 //
 // GetMode 定义依赖版本获取策略
@@ -35,8 +35,8 @@ const (
 	GetModeUpdate GetMode = "UPDATE" // Get compatible updates // 获取兼容更新
 )
 
-// UpdateConfig specifies parameters for individual module updates
-// Controls toolchain version and update strategy for dependency upgrades
+// UpdateConfig specifies parameters for single module updates
+// Manages toolchain version and update approach to upgrade deps
 //
 // UpdateConfig 指定单个模块更新的参数
 // 控制工具链版本和依赖升级的更新策略
@@ -45,7 +45,7 @@ type UpdateConfig struct {
 	Mode      GetMode // Update strategy mode // 更新策略模式
 }
 
-// UpdateModule performs dependency update for a specific module path
+// UpdateModule performs dep update on a specific module path
 // Uses specified toolchain and mode to execute go get commands with output monitoring
 //
 // UpdateModule 为特定模块路径执行依赖更新
@@ -80,6 +80,10 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
 				return true
 			}
+			if sdkInfo, matched := MatchGoDownloadingSdkInfo(line); matched {
+				zaplog.SUG.Debugln("go-downloading-sdk-info:", eroticgo.CYAN.Sprint(neatjsons.S(sdkInfo)))
+				return true
+			}
 			return false
 		}).ExecInPipe(commands[0], commands[1:]...)
 	if err != nil {
@@ -92,7 +96,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	return nil
 }
 
-// UpgradeInfo captures successful dependency upgrade information
+// UpgradeInfo captures success dep upgrade information
 // Parsed from go get command output to track version changes
 //
 // UpgradeInfo 捕获成功的依赖升级信息
@@ -126,8 +130,8 @@ func MatchUpgrade(outputLine string) (*UpgradeInfo, bool) {
 	}, true
 }
 
-// ToolchainVersionMismatch represents Go toolchain version compatibility issues
-// Contains detailed information about version conflicts during dependency updates
+// ToolchainVersionMismatch represents Go toolchain version support issues
+// Contains detailed information about version conflicts during dep updates
 //
 // ToolchainVersionMismatch 代表 Go 工具链版本兼容性问题
 // 包含依赖更新期间版本冲突的详细信息
@@ -161,6 +165,39 @@ func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch
 		RequiredGoVersion: matches[3],
 		RunningGoVersion:  matches[4],
 		Toolchain:         matches[5],
+	}, true
+}
+
+// GoDownloadingSdkInfo captures Go toolchain download information
+// Parsed from go command output when toolchain is being downloaded
+//
+// GoDownloadingSdkInfo 捕获 Go 工具链下载信息
+// 从 go 命令输出中解析工具链下载时的信息
+type GoDownloadingSdkInfo struct {
+	Action   string `json:"action"`   // Download action (e.g., "downloading") // 下载动作（如 "downloading"）
+	Version  string `json:"version"`  // Go version being downloaded // 正在下载的 Go 版本
+	Platform string `json:"platform"` // Target platform (e.g., "linux/amd64") // 目标平台（如 "linux/amd64"）
+}
+
+// MatchGoDownloadingSdkInfo parses Go toolchain download messages
+// Extracts structured information from messages like "go: downloading go1.22.8 (linux/amd64)"
+//
+// MatchGoDownloadingSdkInfo 解析 Go 工具链下载消息
+// 从类似 "go: downloading go1.22.8 (linux/amd64)" 的消息中提取结构化信息
+func MatchGoDownloadingSdkInfo(outputLine string) (*GoDownloadingSdkInfo, bool) {
+	// Pattern matches: go: downloading go1.22.8 (linux/amd64)
+	pattern := `^go:\s+(downloading)\s+(go[\d\.]+)\s+\(([^)]+)\)$`
+	re := regexp.MustCompile(pattern)
+
+	matches := re.FindStringSubmatch(outputLine)
+	if len(matches) != 4 {
+		return nil, false
+	}
+
+	return &GoDownloadingSdkInfo{
+		Action:   matches[1],
+		Version:  matches[2],
+		Platform: matches[3],
 	}, true
 }
 

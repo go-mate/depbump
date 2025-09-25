@@ -201,7 +201,7 @@ depbump everyone latest --skip-gitlab
 
 2. **Package Conflicts**
    - Run `go mod tidy -e` following updates to clean up
-   - Use `depbump direct` instead of `depbump everyone` for safe updates
+   - Use `depbump direct` instead of `depbump everyone` to get safe updates
    - Check go.mod for incompatible version constraints
 
 3. **Workspace Issues**
