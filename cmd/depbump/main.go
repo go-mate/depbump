@@ -1,5 +1,5 @@
-// Package main: depbump command-line tool entry point
-// Provides automatic dependency upgrade and management for Go modules
+// Package main: depbump command-line application main package
+// Provides automatic package upgrade and management tools
 // Supports workspace operations and configurable update strategies
 //
 // main: depbump 命令行工具入口点
@@ -43,6 +43,8 @@ import (
 // go run main.go sync tags
 // go run main.go sync subs
 // go run main.go bump
+// go run main.go bump direct
+// go run main.go bump everyone
 func main() {
 	currentPath := rese.C1(os.Getwd())
 	zaplog.LOG.Debug("current:", zap.String("path", currentPath))

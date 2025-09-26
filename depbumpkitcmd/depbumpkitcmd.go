@@ -1,4 +1,4 @@
-// Package depbumpkitcmd: Package checking and synchronization for Go modules
+// Package depbumpkitcmd: Package checking and synchronization within Go modules
 // Provides intelligent package upgrade tools that prevent Go toolchain contagion
 // Implements version analysis and selective upgrades while maintaining Go version matching
 // Supports upgrade-first approach to prevent package downgrades in production systems
@@ -30,7 +30,7 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-// SetupBumpCmd creates and configures the bump command for package management
+// SetupBumpCmd creates and configures the bump command handling package management
 // Integrates with workspace execution framework to process multiple Go modules
 // Provides intelligent package analysis and upgrade capabilities
 //
@@ -44,30 +44,73 @@ func SetupBumpCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 		Run: func(cmd *cobra.Command, args []string) {
 			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
 				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies()
+				kit.SyncDependencies(&BumpDepsConfig{
+					Cate: depbump.DepCateDirect,
+				})
 				return nil
 			}))
 		},
 	}
+
+	// Add direct and everyone subcommands
+	cmd.AddCommand(&cobra.Command{
+		Use:     "direct",
+		Aliases: []string{"directs"},
+		Short:   "Bump direct dependencies with Go version matching",
+		Run: func(cmd *cobra.Command, args []string) {
+			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
+				kit := NewBumpKit(execConfig)
+				kit.SyncDependencies(&BumpDepsConfig{
+					Cate: depbump.DepCateDirect,
+				})
+				return nil
+			}))
+		},
+	})
+
+	cmd.AddCommand(&cobra.Command{
+		Use:     "everyone",
+		Aliases: []string{"require", "requires"},
+		Short:   "Bump all dependencies with Go version matching",
+		Run: func(cmd *cobra.Command, args []string) {
+			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
+				kit := NewBumpKit(execConfig)
+				kit.SyncDependencies(&BumpDepsConfig{
+					Cate: depbump.DepCateEveryone,
+				})
+				return nil
+			}))
+		},
+	})
+
 	rootCmd.AddCommand(cmd)
+}
+
+// BumpDepsConfig provides configuration needed in intelligent package bump operations
+// Controls package types and upgrade actions with Go version matching
+//
+// BumpDepsConfig 为智能依赖升级操作提供配置
+// 控制依赖类别和带 Go 版本匹配的升级行为
+type BumpDepsConfig struct {
+	Cate depbump.DepCate // Dependency type used in bump operations // 升级操作的依赖类别
 }
 
 // BumpKit handles package matching validation and intelligent upgrades
 // Manages Go version requirements and package version resolution
-// Implements caching mechanisms for efficient package analysis
+// Implements caching mechanisms enabling efficient package analysis
 //
 // BumpKit 处理依赖兼容性验证和智能升级
 // 管理 Go 版本要求和依赖版本解析
 // 实现缓存机制以提高包分析效率
 type BumpKit struct {
-	TargetGoVersion string                // Target Go version for matching checks // 目标 Go 版本用于匹配检查
-	MapDepGoVersion map[string]string     // Cache for package Go version requirements // 包 Go 版本要求的缓存
-	execConfig      *osexec.CommandConfig // Execution configuration for command operations // 命令操作的执行配置
+	TargetGoVersion string                // Target Go version during matching checks // 目标 Go 版本用于匹配检查
+	MapDepGoVersion map[string]string     // Cache containing package Go version requirements // 包 Go 版本要求的缓存
+	execConfig      *osexec.CommandConfig // Execution configuration handling command operations // 命令操作的执行配置
 }
 
-// NewBumpKit creates a new package matching validator with toolchain analysis
+// NewBumpKit creates a new package matching engine with toolchain analysis
 // Extracts target Go version from module toolchain configuration
-// Initializes caching system for efficient package analysis
+// Initializes caching system enabling efficient package analysis
 //
 // NewBumpKit 创建新的依赖兼容性验证器，带有工具链分析
 // 从模块工具链配置中提取目标 Go 版本
@@ -88,26 +131,26 @@ func NewBumpKit(execConfig *osexec.ExecConfig) *BumpKit {
 	}
 }
 
-// SyncDependencies performs complete package analysis and applies intelligent upgrades
-// Analyzes direct packages for matching and version optimization
+// SyncDependencies performs package analysis and applies intelligent upgrades
+// Analyzes packages based on configuration during matching and version optimization
 // Applies matching upgrades to prevent toolchain version conflicts
 //
-// SyncDependencies 执行完整的依赖分析并应用智能升级
-// 分析所有直接依赖的兼容性和版本优化
+// SyncDependencies 执行依赖分析并应用智能升级
+// 根据配置分析依赖的兼容性和版本优化
 // 仅应用兼容的升级以防止工具链版本冲突
-func (c *BumpKit) SyncDependencies() {
-	zaplog.SUG.Infoln("starting dependencies analysis - Go", eroticgo.CYAN.Sprint(c.TargetGoVersion))
-	deps := c.AnalyzeDependencies()
+func (c *BumpKit) SyncDependencies(config *BumpDepsConfig) {
+	zaplog.SUG.Infoln("starting", string(config.Cate), "dependencies analysis - Go", eroticgo.CYAN.Sprint(c.TargetGoVersion))
+	deps := c.AnalyzeDependencies(config.Cate)
 	zaplog.SUG.Debugln("analysis result", neatjsons.S(deps))
 
-	zaplog.SUG.Infoln("🔧 Applying updates...")
+	zaplog.SUG.Infoln("🔧 Applying", string(config.Cate), "updates...")
 	must.Done(c.ApplyUpdates(deps))
-	zaplog.SUG.Infoln("✅ Updates success!")
+	zaplog.SUG.Infoln("✅", string(config.Cate), "updates success!")
 }
 
 // DependencyInfo represents comprehensive information about a package upgrade
 // Contains version transition details and Go version requirements
-// Used for analysis reporting and upgrade decision making
+// Used during analysis reporting and upgrade decision making
 //
 // DependencyInfo 表示依赖升级的全面信息
 // 包含版本转换详情和 Go 版本要求
@@ -116,28 +159,28 @@ type DependencyInfo struct {
 	Package       string
 	OldDepVersion string
 	NewDepVersion string
-	NewGoVersion  string // Go version required for new package version // 新包版本需要的 Go 版本
+	NewGoVersion  string // Go version required in new package version // 新包版本需要的 Go 版本
 }
 
-// AnalyzeDependencies performs comprehensive analysis of direct packages
-// Evaluates each package for upgrades within Go version constraints
+// AnalyzeDependencies performs comprehensive analysis of dependencies according to type
+// Evaluates each package during upgrades within Go version constraints
 // Returns detailed upgrade recommendations with version matching information
 //
-// AnalyzeDependencies 对所有直接依赖执行全面分析
+// AnalyzeDependencies 根据类别对依赖执行全面分析
 // 在 Go 版本约束内评估每个依赖的潜在升级
 // 返回带有版本兼容性信息的详细升级建议
-func (c *BumpKit) AnalyzeDependencies() []*DependencyInfo {
+func (c *BumpKit) AnalyzeDependencies(cate depbump.DepCate) []*DependencyInfo {
 	projectDIR := osmustexist.ROOT(c.execConfig.Path)
 
 	moduleInfo := rese.P1(depbump.GetModuleInfo(projectDIR))
-	directRequires := moduleInfo.GetDirectRequires()
+	requires := moduleInfo.GetScopedRequires(cate)
 
-	deps := make([]*DependencyInfo, 0, len(directRequires))
-	zaplog.SUG.Infoln("analyzing", eroticgo.CYAN.Sprint(len(directRequires)), "dependencies")
+	deps := make([]*DependencyInfo, 0, len(requires))
+	zaplog.SUG.Infoln("analyzing", eroticgo.CYAN.Sprint(len(requires)), string(cate), "dependencies")
 
-	for idx, req := range directRequires {
+	for idx, req := range requires {
 		// 显示进度以提升用户体验
-		progress := fmt.Sprintf("(%d/%d)", idx+1, len(directRequires))
+		progress := fmt.Sprintf("(%d/%d)", idx+1, len(requires))
 		zaplog.SUG.Infoln(progress, "analyzing", eroticgo.GREEN.Sprint(req.Path))
 
 		versions := c.GetVersionList(req.Path)
@@ -176,7 +219,7 @@ type BestPackageVersion struct {
 	GoVersion string // Required Go version // 需要的 Go 版本
 }
 
-// SelectBestPackageVersion finds the best matching version for a given package
+// SelectBestPackageVersion finds the best matching version within a given package
 // Implements upgrade-first approach while respecting Go version matching constraints
 // Returns the best available version, maintains current version if no upgrade possible
 //
@@ -223,9 +266,9 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 	return packageVersion
 }
 
-// GetVersionList retrieves and sorts available versions for a package
+// GetVersionList retrieves and sorts available versions within a package
 // Uses Go module system to fetch version information from package repositories
-// Returns versions sorted in descending sequence for efficient newest-first processing
+// Returns versions sorted in descending sequence enabling efficient newest-first processing
 //
 // GetVersionList 检索并排序包的所有可用版本
 // 使用 Go 模块系统从包仓库获取版本信息
@@ -253,7 +296,7 @@ func (c *BumpKit) GetVersionList(pkg string) []string {
 	return versions
 }
 
-// GetPackageGoRequirement determines the Go version requirement for a specific package version
+// GetPackageGoRequirement determines the Go version requirement within a specific package version
 // Downloads and analyzes go.mod files to extract toolchain and Go version constraints
 // Implements intelligent caching to minimize redundant package downloads
 // Handles old packages without go.mod files with sensible defaults
@@ -310,7 +353,7 @@ func (c *BumpKit) GetPackageGoRequirement(pkgPath, version string) string {
 }
 
 // ApplyUpdates applies validated package updates to the current module
-// Executes go get commands for each approved package upgrade
+// Executes go get commands during each approved package upgrade
 // Performs module cleanup to ensure consistent package state
 //
 // ApplyUpdates 将已验证的依赖更新应用到当前模块

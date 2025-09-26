@@ -1,6 +1,6 @@
-// Package depsynctagcmd: Git tag synchronization for dependency management
-// Provides commands for syncing dependency versions with Git tags across workspace
-// Supports latest tag resolution and selective dependency synchronization
+// Package depsynctagcmd: Git tag synchronization helping package management
+// Provides commands that sync package versions with Git tags across workspace
+// Supports latest tag resolution and selective package synchronization
 //
 // depsynctagcmd: 用于依赖管理的 Git 标签同步
 // 提供在工作区中同步依赖版本与 Git 标签的命令
@@ -22,7 +22,7 @@ import (
 )
 
 // SetupSyncCmd creates sync command and adds it to root command
-// Provides basic go work sync functionality and tag-based synchronization subcommands
+// Provides basic go work sync features and tag-based synchronization subcommands
 //
 // SetupSyncCmd 创建同步命令并添加到根命令
 // 提供基本的 go work sync 功能和基于标签的同步子命令
@@ -48,8 +48,8 @@ func SetupSyncCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 	rootCmd.AddCommand(cmd)
 }
 
-// SyncTagsCmd creates command for synchronizing dependencies to their latest Git tags
-// Updates dependencies to match their corresponding Git tag versions
+// SyncTagsCmd creates command that synchronizes dependencies to the latest Git tags
+// Updates dependencies to match corresponding Git tag versions
 //
 // SyncTagsCmd 创建用于将依赖同步到最新 Git 标签的命令
 // 更新依赖以匹配其相应的 Git 标签版本
@@ -82,8 +82,8 @@ func SyncSubsCmd(config *worksexec.WorksExec) *cobra.Command {
 	return cmd
 }
 
-// SyncTags performs Git tag-based dependency synchronization across workspace
-// Compares current dependency versions with Git tags and updates when different
+// SyncTags performs Git tag-based package synchronization across workspace
+// Compares current package versions with Git tags and updates when different
 //
 // SyncTags 在工作区中执行基于 Git 标签的依赖同步
 // 比较当前依赖版本与 Git 标签，在不同时进行更新
@@ -146,7 +146,7 @@ func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 }
 
 // GetPkgTagsMap retrieves latest Git tags for all modules in the workspace
-// Creates a mapping from module paths to their corresponding Git tag versions
+// Creates a mapping from module paths to matching Git tag versions
 //
 // GetPkgTagsMap 获取工作区中所有模块的最新 Git 标签
 // 创建从模块路径到其相应 Git 标签版本的映射

@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
 [![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
 [![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
-[![Supported Go Versions](https://img.shields.io/badge/Go-1.22+-lightgrey.svg)](https://go.dev/)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.22--1.25-lightgrey.svg)](https://go.dev/)
 [![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
 
@@ -84,9 +84,15 @@ depbump sync subs
 ### 智能依赖管理
 
 ```bash
-# 智能 Go 版本兼容性检查和升级
+# 智能 Go 版本兼容性检查和升级（默认：直接依赖）
 # 防止升级依赖时的 Go 工具链传染
 depbump bump
+
+# 仅升级直接依赖，带 Go 版本兼容性检查
+depbump bump direct
+
+# 升级所有依赖（直接 + 间接），带 Go 版本兼容性检查
+depbump bump everyone
 
 # 在工作区环境中工作（处理所有模块）
 cd workspace-root && depbump bump
@@ -102,8 +108,11 @@ cd workspace-root && depbump bump
 ### 依赖类别
 
 - **module**: 使用 `go get -u ./...` 更新模块依赖
-- **direct**: 仅更新 go.mod 中直接声明的依赖  
+- **direct**: 仅更新 go.mod 中直接声明的依赖 - 别名：`directs`
 - **everyone**: 更新每个依赖 - 别名：`require`, `requires`
+- **bump**: 智能 Go 版本兼容性升级（默认：直接依赖）
+  - **bump direct**: 升级直接依赖，带版本兼容性检查 - 别名：`directs`
+  - **bump everyone**: 升级所有依赖，带版本兼容性检查 - 别名：`require`, `requires`
 - **latest**: 获取最新可用版本（可能有破坏性更改）
 - **update**: 获取兼容的更新版本（遵循语义化版本）
 

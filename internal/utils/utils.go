@@ -1,6 +1,6 @@
 // Package utils: Common functions for depbump package management
 // Provides semantic version comparison and Go version matching checks
-// Implements official Go module version comparison logic with pseudo-version support
+// Implements standard Go module version comparison logic with pseudo-version support
 // Optimized for package analysis and toolchain matching validation
 //
 // utils: depbump 包管理的通用工具函数
@@ -15,7 +15,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// CompareVersions compares two version strings using official Go semantic versioning
+// CompareVersions compares two version strings using standard Go semantic versioning
 // Returns -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2
 // Handles version prefix normalization for consistent comparison
 // Supports pseudo-versions, pre-release versions, and complex version formats
@@ -25,7 +25,7 @@ import (
 // 自动处理版本前缀标准化以实现一致比较
 // 支持伪版本、预发布版本和复杂版本格式
 func CompareVersions(v1, v2 string) int {
-	// Ensure versions have "v" prefix for semver compatibility
+	// Ensure versions have "v" prefix needed in semantic version format
 	// 确保版本号带有 "v" 前缀以兼容 semver
 	if !strings.HasPrefix(v1, "v") {
 		v1 = "v" + v1
@@ -37,8 +37,8 @@ func CompareVersions(v1, v2 string) int {
 }
 
 // CanUseGoVersion validates if a required Go version can operate with target version
-// Returns true when required version is less than or equal to target version
-// Handles empty required version as universally compatible (returns true)
+// Returns true when required version is less than target version, plus matching versions
+// Handles missing required version as compatible with each version (returns true)
 // Essential for preventing Go toolchain version conflicts in package upgrades
 //
 // CanUseGoVersion 验证所需 Go 版本是否能与目标版本配合工作

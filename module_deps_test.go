@@ -55,7 +55,7 @@ func TestParseModuleFileDemo(t *testing.T) {
 	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), modFile.Module.Mod.Path)
 }
 
-// TestParseModuleFile tests the ParseModuleFile utility function wrapper
+// TestParseModuleFile tests the ParseModuleFile assistant function
 // Validates encapsulated file path handling and module parsing function
 //
 // TestParseModuleFile 测试 ParseModuleFile 工具函数包装器
@@ -69,7 +69,7 @@ func TestParseModuleFile(t *testing.T) {
 }
 
 // TestModuleInfo_GetDirectRequires tests filtering for direct (non-indirect) dependencies
-// Validates that indirect dependencies are properly excluded from the result set
+// Validates that indirect dependencies are excluded from the result set
 //
 // TestModuleInfo_GetDirectRequires 测试过滤直接（非间接）依赖
 // 验证间接依赖被正确排除在结果集之外
@@ -80,7 +80,7 @@ func TestModuleInfo_GetDirectRequires(t *testing.T) {
 	t.Log(neatjsons.S(requires))
 }
 
-// TestModuleInfo_GetScopedRequires tests dep filtering by type scope
+// TestModuleInfo_GetScopedRequires tests dep filtering within type scope
 // Validates filtering logic for direct, indirect, and all dep types
 //
 // TestModuleInfo_GetScopedRequires 测试按类别范围过滤依赖

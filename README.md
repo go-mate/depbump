@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
 [![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
 [![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
-[![Supported Go Versions](https://img.shields.io/badge/Go-1.22+-lightgrey.svg)](https://go.dev/)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.22--1.25-lightgrey.svg)](https://go.dev/)
 [![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
 
@@ -84,9 +84,15 @@ depbump sync subs
 ### Intelligent Package Management
 
 ```bash
-# Smart Go version matching checks and upgrades
+# Smart Go version matching checks and upgrades (default: direct dependencies)
 # Prevents Go toolchain contagion while upgrading dependencies
 depbump bump
+
+# Upgrade direct dependencies only with Go version matching
+depbump bump direct
+
+# Upgrade all dependencies (direct + indirect) with Go version matching
+depbump bump everyone
 
 # Works in workspace environment (processes all modules)
 cd workspace-root && depbump bump
@@ -102,8 +108,11 @@ cd workspace-root && depbump bump
 ### Package Categories
 
 - **module**: Update module dependencies using `go get -u ./...`
-- **direct**: Update direct (explicit) packages declared in go.mod  
+- **direct**: Update direct (explicit) packages declared in go.mod - aliases: `directs`
 - **everyone**: Update each package - aliases: `require`, `requires`
+- **bump**: Smart Go version matching upgrades (default: direct)
+  - **bump direct**: Upgrade direct dependencies with version matching - aliases: `directs`
+  - **bump everyone**: Upgrade all dependencies with version matching - aliases: `require`, `requires`
 - **latest**: Get latest available versions (might have breaking changes)
 - **update**: Get compatible updates (respects semantic versioning)
 

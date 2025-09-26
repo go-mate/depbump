@@ -1,6 +1,6 @@
 // Package depbump: Advanced dep update engine with version management
 // Implements intelligent dep upgrading with toolchain management
-// Supports pattern matching for upgrade output and error diagnostics
+// Supports pattern matching within upgrade output and diagnostics
 //
 // depbump: 高级依赖更新引擎，带版本控制
 // 实现智能依赖升级，包含工具链管理
@@ -35,14 +35,14 @@ const (
 	GetModeUpdate GetMode = "UPDATE" // Get compatible updates // 获取兼容更新
 )
 
-// UpdateConfig specifies parameters for single module updates
+// UpdateConfig specifies parameters when updating single modules
 // Manages toolchain version and update approach to upgrade deps
 //
 // UpdateConfig 指定单个模块更新的参数
 // 控制工具链版本和依赖升级的更新策略
 type UpdateConfig struct {
 	Toolchain string  // Go toolchain version to use // 使用的 Go 工具链版本
-	Mode      GetMode // Update strategy mode // 更新策略模式
+	Mode      GetMode // Update method configuration // 更新策略模式
 }
 
 // UpdateModule performs dep update on a specific module path
@@ -69,7 +69,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
 
 	output, err := execConfig.NewConfig().
-		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress dependency Go version requirements // 在升级时需要用项目的go版本号压制住依赖的go版本号
+		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时需要用项目的go版本号压制住依赖的go版本号
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := MatchUpgrade(line); matched {
@@ -104,7 +104,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 type UpgradeInfo struct {
 	Module     string `json:"module"`      // Module path that was upgraded // 已升级的模块路径
 	OldVersion string `json:"old_version"` // Previous version // 之前的版本
-	NewVersion string `json:"new_version"` // Updated version after upgrade // 升级后的更新版本
+	NewVersion string `json:"new_version"` // Updated version following upgrade // 升级后的更新版本
 }
 
 // MatchUpgrade parses go get output to extract upgrade information
@@ -201,21 +201,21 @@ func MatchGoDownloadingSdkInfo(outputLine string) (*GoDownloadingSdkInfo, bool) 
 	}, true
 }
 
-// UpdateDepsConfig provides comprehensive configuration for batch dependency updates
-// Supports selective updating based on dependency categories and source filtering
+// UpdateDepsConfig provides comprehensive configuration needed in batch package updates
+// Supports selective updating based on package categories and source filtering
 //
 // UpdateDepsConfig 为批量依赖更新提供全面的配置
 // 支持基于依赖类别和源过滤的选择性更新
 type UpdateDepsConfig struct {
-	Cate       DepCate // Dependency category filter // 依赖类别过滤器
-	Mode       GetMode // Update mode strategy // 更新模式策略
+	Cate       DepCate // Dependency type scope // 依赖类别过滤器
+	Mode       GetMode // Update mode configuration // 更新模式策略
 	GitlabOnly bool    // Update just GitLab dependencies // 仅更新 GitLab 依赖
 	SkipGitlab bool    // Skip GitLab dependencies // 跳过 GitLab 依赖
 	GithubOnly bool    // Update just GitHub dependencies // 仅更新 GitHub 依赖
 	SkipGithub bool    // Skip GitHub dependencies // 跳过 GitHub 依赖
 }
 
-// UpdateDeps orchestrates batch dependency updates according to configuration
+// UpdateDeps orchestrates batch package updates according to configuration
 // Processes filtered dependencies with progress tracking and error collection
 //
 // UpdateDeps 根据配置编排批量依赖更新

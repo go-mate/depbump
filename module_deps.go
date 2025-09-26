@@ -1,5 +1,5 @@
 // Package depbump: Go module dep management and upgrade automation
-// Provides comprehensive tools for analyzing, updating, and managing Go module deps
+// Provides comprehensive tools that analyze, update, and manage Go module deps
 // Supports both direct and indirect dep handling with version management integration
 //
 // depbump: Go 模块依赖管理和升级自动化
@@ -19,8 +19,8 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-// DepCate defines the category of dependencies to be processed
-// Supports filtering by direct, indirect, or all dependency types
+// DepCate defines the type of dependencies to be processed
+// Supports filtering: direct, indirect, and complete package types
 //
 // DepCate 定义要处理的依赖类别
 // 支持按直接、间接或所有依赖类型过滤
@@ -64,9 +64,9 @@ type ModuleInfo struct {
 	Require   []*Require `json:"Require"`   // Dependency list // 依赖列表
 }
 
-// GetToolchainVersion returns the effective Go toolchain version for this module
+// GetToolchainVersion returns the effective Go toolchain version within this module
 // Falls back to module Go version with "go" prefix when toolchain is not specified
-// Used to ensure consistent Go version during dependency updates
+// Used to ensure consistent Go version during package updates
 //
 // GetToolchainVersion 返回此模块的有效 Go 工具链版本
 // 当未指定工具链时，回退到带有 "go" 前缀的模块 Go 版本
@@ -78,7 +78,7 @@ func (a *ModuleInfo) GetToolchainVersion() string {
 }
 
 // GetDirectRequires filters and returns just direct (non-indirect) dependencies
-// Useful for updating just the explicit dependencies
+// Useful when updating explicit dependencies
 //
 // GetDirectRequires 过滤并返回仅直接（非间接）依赖
 // 适用于仅更新显式声明的依赖
@@ -92,8 +92,8 @@ func (a *ModuleInfo) GetDirectRequires() []*Require {
 	return directs
 }
 
-// GetScopedRequires returns dependencies filtered by the specified category
-// Supports filtering by direct, indirect, or all dependency types
+// GetScopedRequires returns dependencies filtered according to the specified type
+// Supports filtering: direct, indirect, and complete package types
 //
 // GetScopedRequires 返回按指定类别过滤的依赖
 // 支持按直接、间接或所有依赖类型过滤
@@ -134,7 +134,7 @@ func GetModuleInfo(projectPath string) (*ModuleInfo, error) {
 }
 
 // ParseModuleFile reads and parses the go.mod file using golang.org/x/mod/modfile
-// Returns the parsed module file structure for advanced manipulation
+// Returns the parsed module file structure enabling advanced manipulation
 //
 // ParseModuleFile 使用 golang.org/x/mod/modfile 读取和解析 go.mod 文件
 // 返回解析后的模块文件结构，用于高级操作
