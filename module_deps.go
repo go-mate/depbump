@@ -27,9 +27,9 @@ import (
 type DepCate string
 
 const (
-	DepCateDirect   DepCate = "DIRECT"   // Direct dependencies just // 仅直接依赖
-	DepCateIndirect DepCate = "INDIRECT" // Indirect dependencies just // 仅间接依赖
-	DepCateEveryone DepCate = "EVERYONE" // All dependencies // 所有依赖
+	DepCateDirect   DepCate = "DIRECT"   // Direct packages just // 仅直接包
+	DepCateIndirect DepCate = "INDIRECT" // Indirect packages just // 仅间接包
+	DepCateEveryone DepCate = "EVERYONE" // Each package // 每个包
 )
 
 // Module represents the main module information from go.mod
@@ -47,9 +47,9 @@ type Module struct {
 // Require 代表单个依赖需求
 // 包含依赖路径、版本和间接状态
 type Require struct {
-	Path     string `json:"Path"`     // Dep path // 依赖路径
+	Path     string `json:"Path"`     // Package path // 包路径
 	Version  string `json:"Version"`  // Current version // 当前版本
-	Indirect bool   `json:"Indirect"` // Whether indirect dep // 是否为间接依赖
+	Indirect bool   `json:"Indirect"` // If indirect package // 是否为间接包
 }
 
 // ModuleInfo contains complete module dep information
@@ -59,9 +59,9 @@ type Require struct {
 // 从 go mod edit -json 输出解析，包含工具链详情
 type ModuleInfo struct {
 	Module    *Module    `json:"Module"`    // Main module info // 主模块信息
-	Go        string     `json:"Go"`        // Go version requirement // Go 版本需求
+	Go        string     `json:"Go"`        // Go version requirement // Go 版本要求
 	Toolchain string     `json:"Toolchain"` // Toolchain specification // 工具链规范
-	Require   []*Require `json:"Require"`   // Dependency list // 依赖列表
+	Require   []*Require `json:"Require"`   // Package list // 包列表
 }
 
 // GetToolchainVersion returns the effective Go toolchain version within this module
@@ -78,7 +78,7 @@ func (a *ModuleInfo) GetToolchainVersion() string {
 }
 
 // GetDirectRequires filters and returns just direct (non-indirect) dependencies
-// Useful when updating explicit dependencies
+// Needed when updating explicit packages
 //
 // GetDirectRequires 过滤并返回仅直接（非间接）依赖
 // 适用于仅更新显式声明的依赖

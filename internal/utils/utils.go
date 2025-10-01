@@ -10,44 +10,62 @@
 package utils
 
 import (
+	"go/version"
 	"strings"
 
 	"golang.org/x/mod/semver"
 )
 
-// CompareVersions compares two version strings using standard Go semantic versioning
+// CompareVersions compares package version strings using semver
 // Returns -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2
-// Handles version prefix normalization for consistent comparison
-// Supports pseudo-versions, pre-release versions, and complex version formats
+// Expects versions with "v" prefix (e.g., v1.2.3) from go list -m -versions output
 //
-// CompareVersions 使用官方 Go 语义版本比较两个版本字符串
+// CompareVersions 使用 semver 比较包版本字符串
 // 如果 v1 < v2 返回 -1，v1 == v2 返回 0，v1 > v2 返回 1
-// 自动处理版本前缀标准化以实现一致比较
-// 支持伪版本、预发布版本和复杂版本格式
+// 期望带 "v" 前缀的版本（如 v1.2.3）来自 go list -m -versions 输出
 func CompareVersions(v1, v2 string) int {
-	// Ensure versions have "v" prefix needed in semantic version format
-	// 确保版本号带有 "v" 前缀以兼容 semver
-	if !strings.HasPrefix(v1, "v") {
-		v1 = "v" + v1
-	}
-	if !strings.HasPrefix(v2, "v") {
-		v2 = "v" + v2
-	}
 	return semver.Compare(v1, v2)
 }
 
-// CanUseGoVersion validates if a required Go version can operate with target version
-// Returns true when required version is less than target version, plus matching versions
-// Handles missing required version as compatible with each version (returns true)
-// Essential for preventing Go toolchain version conflicts in package upgrades
+// CanUseGoVersion checks if a package's Go version requirement is satisfied
+// Returns true when required <= target (required version is compatible with target)
+// Empty required version is treated as compatible (returns true)
+// Accepts plain Go versions (e.g., 1.22, 1.22.8) from go.mod files
+// Uses official go/version.Compare within accurate toolchain version comparison
 //
-// CanUseGoVersion 验证所需 Go 版本是否能与目标版本配合工作
-// 当所需版本小于或等于目标版本时返回 true
-// 将空的所需版本处理为通用兼容（返回 true）
-// 对于防止包升级中的 Go 工具链版本冲突至关重要
+// CanUseGoVersion 检查包的 Go 版本要求是否满足
+// 当 required <= target 时返回 true（需求版本与目标兼容）
+// 空的需求版本视为兼容（返回 true）
+// 接受纯数字格式的 Go 版本（如 1.22, 1.22.8）来自 go.mod 文件
+// 使用官方 go/version.Compare 进行准确的工具链版本比较
 func CanUseGoVersion(required, target string) bool {
-	if required == "" {
-		return true
+	// Add "go" prefix to match go/version.Compare format
+	// 添加 "go" 前缀以匹配 go/version.Compare 格式
+	if !strings.HasPrefix(required, "go") {
+		required = "go" + required
 	}
-	return CompareVersions(required, target) <= 0
+	if !strings.HasPrefix(target, "go") {
+		target = "go" + target
+	}
+	return version.Compare(required, target) <= 0
+}
+
+// IsStableVersion checks if a package version is a stable release
+// Returns true within valid semver versions without prerelease or +incompatible suffixes
+// Filters out versions like v2.0.0-preview.4, v1.0.0-rc1, v1.0.0+incompatible
+// Expects version string with "v" prefix from go list -m -versions output
+//
+// IsStableVersion 检查包版本是否为稳定发布版本
+// 对没有预发布后缀或 +incompatible 标记的有效 semver 版本返回 true
+// 过滤掉如 v2.0.0-preview.4, v1.0.0-rc1, v1.0.0+incompatible 等版本
+// 期望带 "v" 前缀的版本字符串来自 go list -m -versions 输出
+func IsStableVersion(version string) bool {
+	// Reject +incompatible versions // 拒绝 +incompatible 版本
+	if strings.Contains(version, "+incompatible") {
+		return false
+	}
+
+	// Check valid semver with no prerelease suffix
+	// 检查有效 semver 且无预发布后缀
+	return semver.IsValid(version) && semver.Prerelease(version) == ""
 }

@@ -9,7 +9,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/yyle88/done v1.0.27
 	github.com/yyle88/erero v1.0.23
-	github.com/yyle88/eroticgo v0.0.4
+	github.com/yyle88/eroticgo v0.0.5
 	github.com/yyle88/must v0.0.26
 	github.com/yyle88/neatjson v0.0.12
 	github.com/yyle88/osexec v0.0.32

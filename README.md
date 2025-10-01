@@ -22,11 +22,11 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 🔄 **Smart Package Upgrades**: Auto detect and upgrade outdated Go module packages
 ⚡ **Multiple Update Strategies**: Support direct, indirect, and package updates
 🧠 **Go Version Matching**: Intelligent analysis prevents toolchain contagion during upgrades
-🎯 **Version Management Integration**: Git tag synchronization for consistent package versions
-🌍 **Source Filtering**: Selective updates for GitHub/GitLab sources
+🎯 **Version Management Integration**: Git tag synchronization to maintain consistent package versions
+🌍 **Source Filtering**: Selective updates targeting GitHub/GitLab sources
 📋 **Workspace Support**: Go workspace multi-module batch package management
 
-## Install
+## Installation
 
 ```bash
 go install github.com/go-mate/depbump/cmd/depbump@latest
@@ -88,22 +88,22 @@ depbump sync subs
 # Prevents Go toolchain contagion while upgrading dependencies
 depbump bump
 
-# Upgrade direct dependencies only with Go version matching
+# Upgrade direct dependencies with Go version matching
 depbump bump direct
 
-# Upgrade all dependencies (direct + indirect) with Go version matching
+# Upgrade each package (direct + indirect) with Go version matching
 depbump bump everyone
 
-# Works in workspace environment (processes all modules)
+# Works in workspace environment (processes each module)
 cd workspace-root && depbump bump
 ```
 
 **New `bump` Command Features:**
 - 🧠 **Go Version Matching**: Analyzes each package's Go version requirements
 - 🚫 **Toolchain Contagion Prevention**: Avoids upgrades that would force toolchain changes
-- ⬆️ **Upgrade-First Approach**: Does not downgrade existing packages
+- ⬆️ **Upgrade-First Method**: Does not downgrade existing packages
 - 📊 **Intelligent Analysis**: Shows version transitions with Go version requirements
-- 🔄 **Workspace Integration**: Processes multiple Go modules well
+- 🔄 **Workspace Integration**: Processes multiple Go modules with ease
 
 ### Package Categories
 
@@ -112,7 +112,7 @@ cd workspace-root && depbump bump
 - **everyone**: Update each package - aliases: `require`, `requires`
 - **bump**: Smart Go version matching upgrades (default: direct)
   - **bump direct**: Upgrade direct dependencies with version matching - aliases: `directs`
-  - **bump everyone**: Upgrade all dependencies with version matching - aliases: `require`, `requires`
+  - **bump everyone**: Upgrade each package with version matching - aliases: `require`, `requires`
 - **latest**: Get latest available versions (might have breaking changes)
 - **update**: Get compatible updates (respects semantic versioning)
 
@@ -136,9 +136,9 @@ depbump provides intelligent package management that can:
 ### Workspace Integration
 
 Supports Go 1.18+ workspace features:
-- Auto find modules in workspace
-- Batch process package updates for multiple modules
-- Keep consistency across workspace packages
+- Auto detect modules in workspace
+- Batch process package updates across multiple modules
+- Maintain coherence across workspace packages
 - Auto execute `go work sync`
 
 ### Git Tag Synchronization
@@ -165,20 +165,20 @@ depbump direct
 # Update direct dependencies to latest versions
 depbump direct latest
 
-# Update all dependencies including indirect ones
+# Update each package including indirect ones
 depbump everyone
 
-# Update all dependencies to latest versions
+# Update each package to latest versions
 depbump everyone latest
 ```
 
 ### Sync Commands
 
 ```bash
-# Execute go work sync for workspace
+# Execute go work sync in workspace
 depbump sync
 
-# Sync dependencies to their Git tag versions
+# Sync dependencies to corresponding Git tag versions
 depbump sync tags
 
 # Sync dependencies with latest fallback
@@ -211,26 +211,26 @@ depbump everyone latest --skip-gitlab
 2. **Package Conflicts**
    - Run `go mod tidy -e` following updates to clean up
    - Use `depbump direct` instead of `depbump everyone` to get safe updates
-   - Check go.mod for incompatible version constraints
+   - Check go.mod when encountering incompatible version constraints
 
 3. **Workspace Issues**
-   - Ensure go.work file exists for workspace commands
+   - Ensure go.work file exists when running workspace commands
    - Run `depbump sync` to synchronize workspace dependencies
    - Check that modules are listed in go.work
 
 ## Tips and Best Practices
 
-- **Start with direct packages**: Use `depbump direct` for safe updates
+- **Start with direct packages**: Use `depbump direct` to get safe updates
 - **Test updates**: Run tests when updating packages
 - **Use version management**: Commit go.mod/go.sum before big updates
 - **Step-wise updates**: Update packages in steps, not at once
-- **Watch breaking changes**: Use `depbump direct` (matching) before `depbump direct latest`
+- **Watch breaking changes**: Use `depbump direct` (compatible) before `depbump direct latest`
 - **Workspace sync**: Run `depbump sync` when updating modules in workspaces
 
 ---
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
+<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
 
 ## 📄 License
 
@@ -242,7 +242,7 @@ MIT License. See [LICENSE](LICENSE).
 
 Contributions are welcome! Report bugs, suggest features, and contribute code:
 
-- 🐛 **Found a bug?** Open an issue on GitHub with reproduction steps
+- 🐛 **Found a mistake?** Open an issue on GitHub with reproduction steps
 - 💡 **Have a feature idea?** Create an issue to discuss the suggestion
 - 📖 **Documentation confusing?** Report it so we can improve
 - 🚀 **Need new features?** Share the use cases to help us understand requirements
@@ -268,7 +268,7 @@ New code contributions, follow this process:
 8. **Stage**: Stage changes (`git add .`)
 9. **Commit**: Commit changes (`git commit -m "Add feature xxx"`) ensuring backward compatible code
 10. **Push**: Push to the branch (`git push origin feature/xxx`).
-11. **PR**: Open a pull request on GitHub (on the GitHub webpage) with detailed description.
+11. **PR**: Open a merge request on GitHub (on the GitHub webpage) with detailed description.
 
 Please ensure tests pass and include relevant documentation updates.
 
@@ -285,7 +285,7 @@ Welcome to contribute to this project via submitting merge requests and reportin
 - 📝 **Write tech blogs** about development tools and workflows - we provide content writing support
 - 🌟 **Join the ecosystem** - committed to supporting open source and the (golang) development scene
 
-**Have Fun Coding with this package!** 🎉
+**Have Fun Coding with this package!** 🎉🎉🎉
 
 <!-- TEMPLATE (EN) END: STANDARD PROJECT FOOTER -->
 

@@ -3,7 +3,7 @@
 // Supports workspace operations and configurable update strategies
 //
 // main: depbump 命令行工具入口点
-// 为 Go 模块提供自动依赖升级和管理功能
+// 为 Go 模块提供自动包升级和管理功能
 // 支持工作区操作和可配置的更新策略
 package main
 
@@ -44,7 +44,9 @@ import (
 // go run main.go sync subs
 // go run main.go bump
 // go run main.go bump direct
+// go run main.go bump direct latest
 // go run main.go bump everyone
+// go run main.go bump everyone latest
 func main() {
 	currentPath := rese.C1(os.Getwd())
 	zaplog.LOG.Debug("current:", zap.String("path", currentPath))
@@ -65,7 +67,7 @@ func main() {
 
 	rootCmd := &cobra.Command{
 		Use:   "depbump",
-		Short: "Go dependency management tool",
+		Short: "Go package management assistant",
 		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
 		Run: func(cmd *cobra.Command, args []string) {
 			depbumpsubcmd.UpdateModules(config)

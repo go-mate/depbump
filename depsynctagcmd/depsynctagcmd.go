@@ -145,7 +145,7 @@ func SyncTags(config *worksexec.WorksExec, useLatest bool) error {
 	return nil
 }
 
-// GetPkgTagsMap retrieves latest Git tags for all modules in the workspace
+// GetPkgTagsMap retrieves latest Git tags within each module in the workspace
 // Creates a mapping from module paths to matching Git tag versions
 //
 // GetPkgTagsMap 获取工作区中所有模块的最新 Git 标签

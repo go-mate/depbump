@@ -42,7 +42,7 @@ const (
 // 控制工具链版本和依赖升级的更新策略
 type UpdateConfig struct {
 	Toolchain string  // Go toolchain version to use // 使用的 Go 工具链版本
-	Mode      GetMode // Update method configuration // 更新策略模式
+	Mode      GetMode // Update method configuration // 更新方法配置
 }
 
 // UpdateModule performs dep update on a specific module path
@@ -69,7 +69,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
 
 	output, err := execConfig.NewConfig().
-		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时需要用项目的go版本号压制住依赖的go版本号
+		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := MatchUpgrade(line); matched {
@@ -140,7 +140,7 @@ type ToolchainVersionMismatch struct {
 	ModuleVersion     string // Specific module version // 特定模块版本
 	RequiredGoVersion string // Minimum required Go version // 所需最低 Go 版本
 	RunningGoVersion  string // Active Go version in use // 当前使用的 Go 版本
-	Toolchain         string // GOTOOLCHAIN environment value // GOTOOLCHAIN 环境变量值
+	Toolchain         string // GOTOOLCHAIN environment value // GOTOOLCHAIN 环境工具值
 }
 
 // MatchToolchainVersionMismatch parses toolchain version conflict error messages
@@ -207,12 +207,12 @@ func MatchGoDownloadingSdkInfo(outputLine string) (*GoDownloadingSdkInfo, bool) 
 // UpdateDepsConfig 为批量依赖更新提供全面的配置
 // 支持基于依赖类别和源过滤的选择性更新
 type UpdateDepsConfig struct {
-	Cate       DepCate // Dependency type scope // 依赖类别过滤器
-	Mode       GetMode // Update mode configuration // 更新模式策略
-	GitlabOnly bool    // Update just GitLab dependencies // 仅更新 GitLab 依赖
-	SkipGitlab bool    // Skip GitLab dependencies // 跳过 GitLab 依赖
-	GithubOnly bool    // Update just GitHub dependencies // 仅更新 GitHub 依赖
-	SkipGithub bool    // Skip GitHub dependencies // 跳过 GitHub 依赖
+	Cate       DepCate // Package type scope // 包类型范围
+	Mode       GetMode // Update mode configuration // 更新模式配置
+	GitlabOnly bool    // Update just GitLab dependencies // 仅更新 GitLab 包
+	SkipGitlab bool    // Skip GitLab dependencies // 跳过 GitLab 包
+	GithubOnly bool    // Update just GitHub dependencies // 仅更新 GitHub 包
+	SkipGithub bool    // Skip GitHub dependencies // 跳过 GitHub 包
 }
 
 // UpdateDeps orchestrates batch package updates according to configuration

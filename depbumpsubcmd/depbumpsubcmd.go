@@ -1,8 +1,8 @@
 // Package depbumpsubcmd: Command-line interface to bump deps
-// Provides Cobra-based CLI commands for module, direct, and comprehensive dep updates
+// Provides Cobra-based CLI commands to handle module, direct, and comprehensive dep updates
 // Supports workspace operations with configurable filtering and update strategies
 //
-// depbumpsubcmd: 依赖升级操作的命令行接口
+// depbumpsubcmd: 包升级操作的命令行接口
 // 提供基于 Cobra 的 CLI 命令，用于模块、直接和全面的依赖更新
 // 支持带有可配置过滤和更新策略的工作区操作
 package depbumpsubcmd
@@ -36,7 +36,7 @@ func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 	}
 	updateCmd.AddCommand(NewUpdateModuleCmd(config, "module", []string{"modules"}))
 	updateCmd.AddCommand(NewUpdateDirectCmd(config, "direct", []string{"directs"}))
-	updateCmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone", []string{"require", "requires"})) // Use "everyone" to avoid confusion with "all" // 使用 "everyone" 避免与 "all" 混淆
+	updateCmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone", []string{"require", "requires"})) // Use "everyone" to avoid confusion with "each" // 使用 "everyone" 避免与 "each" 混淆
 
 	// Add structured command
 	// 添加结构化命令
@@ -49,7 +49,7 @@ func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 	rootCmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone", []string{"require", "requires"}))
 }
 
-// NewUpdateModuleCmd creates a command for updating Go modules in workspace
+// NewUpdateModuleCmd creates a command to update Go modules in workspace
 // Provides module-specific update function with configurable usage name
 //
 // NewUpdateModuleCmd 创建用于更新工作区中 Go 模块的命令
@@ -67,7 +67,7 @@ func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string, aliases [
 	return cmd
 }
 
-// UpdateModules performs comprehensive module updates across all workspaces
+// UpdateModules performs comprehensive module updates across each workspace
 // Handles module info fetch, toolchain detection, and cleanup operations
 //
 // UpdateModules 在所有工作区中执行全面的模块更新
@@ -93,7 +93,7 @@ func UpdateModules(config *worksexec.WorksExec) {
 func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain string) {
 	var success = true
 	output := rese.V1(execConfig.NewConfig().
-		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时需要用项目的go版本号压制住依赖的go版本号
+		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
 		WithPath(projectPath).
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
@@ -121,11 +121,11 @@ func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain s
 	}
 }
 
-// NewUpdateDirectCmd creates a command for updating just direct dependencies
+// NewUpdateDirectCmd creates a command to update just direct dependencies
 // Filters out indirect dependencies and provides selective update management
 //
 // NewUpdateDirectCmd 创建仅更新直接依赖的命令
-// 过滤掉间接依赖并提供选择性更新控制
+// 过滤掉间接包并提供选择性更新控制
 func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string, aliases []string) *cobra.Command {
 	const usageNameLatest = "latest"
 
@@ -150,11 +150,11 @@ func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string, aliases [
 	return cmd
 }
 
-// NewUpdateEveryoneCmd creates a command for updating all dependencies
+// NewUpdateEveryoneCmd creates a command to update each package
 // Updates both direct and indirect dependencies with comprehensive filtering options
 //
 // NewUpdateEveryoneCmd 创建用于更新所有依赖的命令
-// 更新直接和间接依赖，带全面的过滤选项
+// 更新直接和间接包，带全面的过滤选项
 func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string, aliases []string) *cobra.Command {
 	const usageNameLatest = "latest"
 
@@ -180,21 +180,21 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string, aliases
 }
 
 // setFlags configures command-line flags that handle package filtering and source management
-// Provides flags for GitLab/GitHub filtering and skip options
+// Provides flags to handle GitLab/GitHub filtering and skip options
 //
-// setFlags 为依赖过滤和源代码控制配置命令行标志
+// setFlags 为包过滤和源代码控制配置命令行标志
 // 提供 GitLab/GitHub 过滤和跳过选项的标志
 func setFlags(cmd *cobra.Command, config *depbump.UpdateDepsConfig) {
-	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab only: only update gitlab dependencies")
+	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab exclusive: update gitlab dependencies exclusively")
 	cmd.Flags().BoolVarP(&config.SkipGitlab, "skip-gitlab", "", false, "skip gitlab: skip update gitlab dependencies")
-	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github only: only update github dependencies")
+	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github exclusive: update github dependencies exclusively")
 	cmd.Flags().BoolVarP(&config.SkipGithub, "skip-github", "", false, "skip github: skip update github dependencies")
 }
 
 // updateDeps executes package updates across workspaces with specified configuration
 // Handles module information access and orchestrates batch updates with cleanup
 //
-// updateDeps 使用指定配置在工作区中执行依赖更新
+// updateDeps 使用指定配置在工作区中执行包更新
 // 处理模块信息检索并编排批量更新，包括清理操作
 func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
 	zaplog.SUG.Debugln(neatjsons.S(updateDepsConfig))
@@ -214,7 +214,7 @@ func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDep
 // Cleans up module dependencies and ensures stable state
 //
 // GoModTide 执行 go mod cleanup，带有错误处理和输出日志
-// 清理模块依赖并确保一致性
+// 清理模块包并确保一致性
 func GoModTide(execConfig *osexec.ExecConfig) error {
 	output, err := execConfig.Exec("go", "mod", "tidy", "-e")
 	if err != nil {
@@ -231,7 +231,7 @@ func GoModTide(execConfig *osexec.ExecConfig) error {
 // Synchronizes workspace configuration and updates package relationships
 //
 // GoWorkSync 执行 go work sync 命令，带错误处理和输出日志
-// 同步工作区配置并更新依赖关系
+// 同步工作区配置并更新包关系
 func GoWorkSync(execConfig *osexec.ExecConfig) error {
 	output, err := execConfig.Exec("go", "work", "sync")
 	if err != nil {

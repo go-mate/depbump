@@ -91,17 +91,17 @@ depbump bump
 # 仅升级直接依赖，带 Go 版本兼容性检查
 depbump bump direct
 
-# 升级所有依赖（直接 + 间接），带 Go 版本兼容性检查
+# 升级每个包（直接 + 间接），带 Go 版本兼容性检查
 depbump bump everyone
 
-# 在工作区环境中工作（处理所有模块）
+# 在工作区环境中工作（处理每个模块）
 cd workspace-root && depbump bump
 ```
 
 **新增 `bump` 命令特性：**
 - 🧠 **Go 版本兼容性**: 分析每个依赖的 Go 版本要求
 - 🚫 **工具链传染防护**: 避免强制工具链变更的升级
-- ⬆️ **仅升级策略**: 永不降级现有依赖
+- ⬆️ **仅升级方式**: 永不降级现有依赖
 - 📊 **智能分析**: 显示版本转换和 Go 版本要求
 - 🔄 **工作区集成**: 高效处理多个 Go 模块
 
@@ -112,7 +112,7 @@ cd workspace-root && depbump bump
 - **everyone**: 更新每个依赖 - 别名：`require`, `requires`
 - **bump**: 智能 Go 版本兼容性升级（默认：直接依赖）
   - **bump direct**: 升级直接依赖，带版本兼容性检查 - 别名：`directs`
-  - **bump everyone**: 升级所有依赖，带版本兼容性检查 - 别名：`require`, `requires`
+  - **bump everyone**: 升级每个包，带版本兼容性检查 - 别名：`require`, `requires`
 - **latest**: 获取最新可用版本（可能有破坏性更改）
 - **update**: 获取兼容的更新版本（遵循语义化版本）
 
@@ -165,10 +165,10 @@ depbump direct
 # 更新直接依赖到最新版本
 depbump direct latest
 
-# 更新每个依赖包括间接依赖
+# 更新每个包包括间接依赖
 depbump everyone
 
-# 更新每个依赖到最新版本
+# 更新每个包到最新版本
 depbump everyone latest
 ```
 
@@ -230,7 +230,7 @@ depbump everyone latest --skip-gitlab
 ---
 
 <!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-06 04:53:24.895249 +0000 UTC -->
+<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
 
 ## 📄 许可证类型
 
@@ -268,7 +268,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 8. **暂存**：暂存更改（`git add .`）
 9. **提交**：提交更改（`git commit -m "Add feature xxx"`）确保向后兼容的代码
 10. **推送**：推送到分支（`git push origin feature/xxx`）
-11. **PR**：在 GitHub 上打开 Pull Request（在 GitHub 网页上）并提供详细描述
+11. **PR**：在 GitHub 上打开 Merge Request（在 GitHub 网页上）并提供详细描述
 
 请确保测试通过并包含相关的文档更新。
 
@@ -276,7 +276,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ## 🌟 项目支持
 
-非常欢迎通过提交 Pull Request 和报告问题来为此项目做出贡献。
+非常欢迎通过提交 Merge Request 和报告问题来为此项目做出贡献。
 
 **项目支持：**
 
@@ -285,7 +285,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 - 📝 **撰写博客**关于开发工具和工作流程 - 我们提供写作支持
 - 🌟 **加入生态** - 致力于支持开源和（golang）开发场景
 
-**祝你用这个包编程愉快！** 🎉
+**祝你用这个包编程愉快！** 🎉🎉🎉
 
 <!-- TEMPLATE (ZH) END: STANDARD PROJECT FOOTER -->
 
