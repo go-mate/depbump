@@ -9,13 +9,13 @@ package depbumpsubcmd
 
 import (
 	"github.com/go-mate/depbump"
-	"github.com/go-mate/go-work/worksexec"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/erero"
 	"github.com/yyle88/eroticgo"
 	"github.com/yyle88/must"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
+	"github.com/yyle88/osexistpath/osmustexist"
 	"github.com/yyle88/rese"
 	"github.com/yyle88/tern"
 	"github.com/yyle88/zaplog"
@@ -26,7 +26,7 @@ import (
 //
 // NewUpdateCmd 创建更新命令并添加到根命令
 // 提供结构化（update 子命令）和直接访问命令
-func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
+func NewUpdateCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 	// Create update subcommand group
 	// 创建更新子命令组
 	updateCmd := &cobra.Command{
@@ -34,9 +34,9 @@ func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 		Short: "Update dependencies",
 		Long:  "Update dependencies with various strategies and filtering options.",
 	}
-	updateCmd.AddCommand(NewUpdateModuleCmd(config, "module", []string{"modules"}))
-	updateCmd.AddCommand(NewUpdateDirectCmd(config, "direct", []string{"directs"}))
-	updateCmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone", []string{"require", "requires"})) // Use "everyone" to avoid confusion with "each" // 使用 "everyone" 避免与 "each" 混淆
+	updateCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "modules"}))
+	updateCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "directs"}))
+	updateCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "require", "requires"})) // Use "everyone" to avoid confusion with "each" // 使用 "everyone" 避免与 "each" 混淆
 
 	// Add structured command
 	// 添加结构化命令
@@ -44,45 +44,41 @@ func NewUpdateCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 
 	// Add direct access commands
 	// 添加直接访问命令
-	rootCmd.AddCommand(NewUpdateModuleCmd(config, "module", []string{"modules"}))
-	rootCmd.AddCommand(NewUpdateDirectCmd(config, "direct", []string{"directs"}))
-	rootCmd.AddCommand(NewUpdateEveryoneCmd(config, "everyone", []string{"require", "requires"}))
+	rootCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "modules"}))
+	rootCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "directs"}))
+	rootCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "require", "requires"}))
 }
 
-// NewUpdateModuleCmd creates a command to update Go modules in workspace
+// NewUpdateModuleCmd creates a command to update Go modules
 // Provides module-specific update function with configurable usage name
 //
-// NewUpdateModuleCmd 创建用于更新工作区中 Go 模块的命令
+// NewUpdateModuleCmd 创建用于更新 Go 模块的命令
 // 提供特定于模块的更新功能，带可配置的用法名称
-func NewUpdateModuleCmd(config *worksexec.WorksExec, usageName string, aliases []string) *cobra.Command {
+func NewUpdateModuleCmd(execConfig *osexec.ExecConfig, usageNames []string) *cobra.Command {
+	must.Have(usageNames)
+
 	cmd := &cobra.Command{
-		Use:     usageName,
-		Aliases: aliases,
+		Use:     usageNames[0],
+		Aliases: usageNames[1:],
 		Short:   "depbump module",
 		Long:    "depbump module",
 		Run: func(cmd *cobra.Command, args []string) {
-			UpdateModules(config)
+			UpdateModules(execConfig)
 		},
 	}
 	return cmd
 }
 
-// UpdateModules performs comprehensive module updates across each workspace
+// UpdateModules performs comprehensive module updates
 // Handles module info fetch, toolchain detection, and cleanup operations
 //
-// UpdateModules 在所有工作区中执行全面的模块更新
+// UpdateModules 执行全面的模块更新
 // 处理模块信息检索、工具链检测和清理操作
-func UpdateModules(config *worksexec.WorksExec) {
-	for _, workspace := range config.GetWorkspaces() {
-		for _, projectPath := range workspace.Projects {
-			moduleInfo := rese.P1(depbump.GetModuleInfo(projectPath))
-			updateModule(config.GetSubCommand(projectPath), projectPath, moduleInfo.GetToolchainVersion())
-			must.Done(GoModTide(config.GetSubCommand(projectPath)))
-		}
-		if workspace.WorkRoot != "" {
-			must.Done(GoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
-		}
-	}
+func UpdateModules(execConfig *osexec.ExecConfig) {
+	projectDIR := osmustexist.ROOT(execConfig.Path)
+	moduleInfo := rese.P1(depbump.GetModuleInfo(projectDIR))
+	updateModule(execConfig, moduleInfo.GetToolchainVersion())
+	must.Done(GoModTide(execConfig))
 }
 
 // updateModule executes go get -u for a single module with toolchain management
@@ -90,11 +86,10 @@ func UpdateModules(config *worksexec.WorksExec) {
 //
 // updateModule 为单个模块执行 go get -u，带工具链管理
 // 处理环境设置和输出处理，带成功日志记录
-func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain string) {
+func updateModule(execConfig *osexec.ExecConfig, toolchain string) {
 	var success = true
 	output := rese.V1(execConfig.NewConfig().
 		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
-		WithPath(projectPath).
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := depbump.MatchUpgrade(line); matched {
@@ -126,7 +121,9 @@ func updateModule(execConfig *osexec.ExecConfig, projectPath string, toolchain s
 //
 // NewUpdateDirectCmd 创建仅更新直接依赖的命令
 // 过滤掉间接包并提供选择性更新控制
-func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string, aliases []string) *cobra.Command {
+func NewUpdateDirectCmd(execConfig *osexec.ExecConfig, usageNames []string) *cobra.Command {
+	usageName := must.Have(usageNames)[0]
+
 	const usageNameLatest = "latest"
 
 	updateDepsConfig := &depbump.UpdateDepsConfig{
@@ -134,18 +131,18 @@ func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string, aliases [
 		Mode: tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
 	}
 	cmd := &cobra.Command{
-		Use:     usageName,
-		Aliases: aliases,
+		Use:     usageNames[0],
+		Aliases: usageNames[1:],
 		Short:   "depbump direct (latest)",
 		Long:    "depbump direct (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			updateDeps(config, updateDepsConfig)
+			updateDeps(execConfig, updateDepsConfig)
 		},
 	}
 	setFlags(cmd, updateDepsConfig)
 
 	if usageName != usageNameLatest {
-		cmd.AddCommand(NewUpdateDirectCmd(config, usageNameLatest, []string{}))
+		cmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{usageNameLatest}))
 	}
 	return cmd
 }
@@ -155,7 +152,9 @@ func NewUpdateDirectCmd(config *worksexec.WorksExec, usageName string, aliases [
 //
 // NewUpdateEveryoneCmd 创建用于更新所有依赖的命令
 // 更新直接和间接包，带全面的过滤选项
-func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string, aliases []string) *cobra.Command {
+func NewUpdateEveryoneCmd(execConfig *osexec.ExecConfig, usageNames []string) *cobra.Command {
+	usageName := must.Have(usageNames)[0]
+
 	const usageNameLatest = "latest"
 
 	updateDepsConfig := &depbump.UpdateDepsConfig{
@@ -163,18 +162,18 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string, aliases
 		Mode: tern.BVV(usageName == usageNameLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
 	}
 	cmd := &cobra.Command{
-		Use:     usageName,
-		Aliases: aliases,
+		Use:     usageNames[0],
+		Aliases: usageNames[1:],
 		Short:   "depbump require (latest)",
 		Long:    "depbump require (latest)",
 		Run: func(cmd *cobra.Command, args []string) {
-			updateDeps(config, updateDepsConfig)
+			updateDeps(execConfig, updateDepsConfig)
 		},
 	}
 	setFlags(cmd, updateDepsConfig)
 
 	if usageName != usageNameLatest {
-		cmd.AddCommand(NewUpdateEveryoneCmd(config, usageNameLatest, []string{}))
+		cmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{usageNameLatest}))
 	}
 	return cmd
 }
@@ -185,29 +184,23 @@ func NewUpdateEveryoneCmd(config *worksexec.WorksExec, usageName string, aliases
 // setFlags 为包过滤和源代码控制配置命令行标志
 // 提供 GitLab/GitHub 过滤和跳过选项的标志
 func setFlags(cmd *cobra.Command, config *depbump.UpdateDepsConfig) {
-	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab exclusive: update gitlab dependencies exclusively")
+	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab exclusive: update gitlab dependencies")
 	cmd.Flags().BoolVarP(&config.SkipGitlab, "skip-gitlab", "", false, "skip gitlab: skip update gitlab dependencies")
-	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github exclusive: update github dependencies exclusively")
+	cmd.Flags().BoolVarP(&config.GithubOnly, "github-only", "", false, "github exclusive: update github dependencies")
 	cmd.Flags().BoolVarP(&config.SkipGithub, "skip-github", "", false, "skip github: skip update github dependencies")
 }
 
-// updateDeps executes package updates across workspaces with specified configuration
-// Handles module information access and orchestrates batch updates with cleanup
+// updateDeps executes package updates with specified configuration
+// Handles module information access and orchestrates updates with cleanup
 //
-// updateDeps 使用指定配置在工作区中执行包更新
-// 处理模块信息检索并编排批量更新，包括清理操作
-func updateDeps(config *worksexec.WorksExec, updateDepsConfig *depbump.UpdateDepsConfig) {
+// updateDeps 使用指定配置执行包更新
+// 处理模块信息检索并编排更新，包括清理操作
+func updateDeps(execConfig *osexec.ExecConfig, updateDepsConfig *depbump.UpdateDepsConfig) {
 	zaplog.SUG.Debugln(neatjsons.S(updateDepsConfig))
 
-	for _, workspace := range config.GetWorkspaces() {
-		for _, projectPath := range workspace.Projects {
-			depbump.UpdateDeps(config.GetSubCommand(projectPath), rese.P1(depbump.GetModuleInfo(projectPath)), updateDepsConfig)
-			must.Done(GoModTide(config.GetSubCommand(projectPath)))
-		}
-		if workspace.WorkRoot != "" {
-			must.Done(GoWorkSync(config.GetSubCommand(workspace.WorkRoot)))
-		}
-	}
+	projectDIR := osmustexist.ROOT(execConfig.Path)
+	depbump.UpdateDeps(execConfig, rese.P1(depbump.GetModuleInfo(projectDIR)), updateDepsConfig)
+	must.Done(GoModTide(execConfig))
 }
 
 // GoModTide executes go mod cleanup with error handling and output logging

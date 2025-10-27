@@ -13,8 +13,6 @@ import (
 	"github.com/go-mate/depbump/depbumpkitcmd"
 	"github.com/go-mate/depbump/depbumpsubcmd"
 	"github.com/go-mate/depbump/depsynctagcmd"
-	"github.com/go-mate/go-work/worksexec"
-	"github.com/go-mate/go-work/workspace"
 	"github.com/go-mate/go-work/workspath"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/must"
@@ -48,35 +46,45 @@ import (
 // go run main.go bump everyone
 // go run main.go bump everyone latest
 func main() {
+	// Get current working DIR
+	// 获取当前工作 DIR
 	currentPath := rese.C1(os.Getwd())
 	zaplog.LOG.Debug("current:", zap.String("path", currentPath))
 
+	// Get executable path
+	// 获取可执行文件路径
 	executePath := rese.C1(os.Executable())
 	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
 
+	// Detect project path from current DIR
+	// 从当前 DIR 检测项目路径
 	projectPath, _, ok := workspath.GetProjectPath(currentPath)
 	must.True(ok)
 	zaplog.LOG.Debug("project:", zap.String("path", projectPath))
 	must.Nice(projectPath)
 
-	execConfig := osexec.NewCommandConfig().WithBash().WithDebug()
-	workspaces := []*workspace.Workspace{
-		workspace.NewWorkspace("", []string{projectPath}),
-	}
-	config := worksexec.NewWorksExec(execConfig, workspaces)
+	// Initialize execution configuration with project path
+	// 用项目路径初始化执行配置
+	execConfig := osexec.NewCommandConfig().WithBash().WithDebug().WithPath(projectPath)
 
+	// Create root command with default module update action
+	// 创建根命令，默认执行模块更新操作
 	rootCmd := &cobra.Command{
 		Use:   "depbump",
 		Short: "Go package management assistant",
 		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
 		Run: func(cmd *cobra.Command, args []string) {
-			depbumpsubcmd.UpdateModules(config)
+			depbumpsubcmd.UpdateModules(execConfig)
 		},
 	}
 
-	depbumpsubcmd.NewUpdateCmd(rootCmd, config)
-	depsynctagcmd.SetupSyncCmd(rootCmd, config)
-	depbumpkitcmd.SetupBumpCmd(rootCmd, config)
+	// Register subcommands
+	// 注册子命令
+	depbumpsubcmd.NewUpdateCmd(rootCmd, execConfig)
+	depsynctagcmd.SetupSyncCmd(rootCmd, execConfig)
+	depbumpkitcmd.SetupBumpCmd(rootCmd, execConfig)
 
+	// Execute CLI application
+	// 执行 CLI 应用程序
 	must.Done(rootCmd.Execute())
 }

@@ -51,11 +51,15 @@ type UpdateConfig struct {
 // UpdateModule 为特定模块路径执行依赖更新
 // 使用指定的工具链和模式执行 go get 命令，并监控输出
 func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig *UpdateConfig) error {
+	// Validate required parameters
+	// 验证必需参数
 	must.Nice(execConfig)
 	must.Nice(modulePath)
 	must.Nice(updateConfig)
 	must.Nice(updateConfig.Toolchain)
 
+	// Build go get command based on update mode
+	// 根据更新模式构建 go get 命令
 	commands := tern.BFF(updateConfig.Mode == GetModeLatest, func() []string {
 		modulePathLatest := tern.BVF(strings.HasSuffix(modulePath, "@latest"), modulePath, func() string {
 			muststrings.NotContains(modulePath, "@")
@@ -68,6 +72,8 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	})
 	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
 
+	// Execute command with toolchain configuration and output matching
+	// 执行命令，配置工具链并匹配输出
 	output, err := execConfig.NewConfig().
 		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
 		WithMatchMore(true).

@@ -18,7 +18,6 @@ import (
 
 	"github.com/go-mate/depbump"
 	"github.com/go-mate/depbump/internal/utils"
-	"github.com/go-mate/go-work/worksexec"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/eroticgo"
 	"github.com/yyle88/must"
@@ -31,25 +30,20 @@ import (
 )
 
 // SetupBumpCmd creates and configures the bump command handling package management
-// Integrates with workspace execution framework to process multiple Go modules
 // Provides intelligent package analysis and upgrade capabilities
 //
 // SetupBumpCmd 创建并配置用于包管理的 bump 命令
-// 与工作区执行框架集成，处理多个 Go 模块
 // 提供智能包分析和升级功能
-func SetupBumpCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
+func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "Bump dependencies to stable versions with Go version matching",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
-				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies(&BumpDepsConfig{
-					Cate: depbump.DepCateDirect,
-					Mode: depbump.GetModeUpdate, // Default: stable versions within // 默认：仅稳定版本
-				})
-				return nil
-			}))
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependencies(&BumpDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: depbump.GetModeUpdate, // Default: stable versions within // 默认：仅稳定版本
+			})
 		},
 	}
 
@@ -59,28 +53,22 @@ func SetupBumpCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 		Aliases: []string{"directs"},
 		Short:   "Bump direct dependencies to stable versions",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
-				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies(&BumpDepsConfig{
-					Cate: depbump.DepCateDirect,
-					Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-				})
-				return nil
-			}))
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependencies(&BumpDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
+			})
 		},
 	}
 	directCmd.AddCommand(&cobra.Command{
 		Use:   "latest",
 		Short: "Bump direct dependencies to latest versions (including prerelease)",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
-				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies(&BumpDepsConfig{
-					Cate: depbump.DepCateDirect,
-					Mode: depbump.GetModeLatest, // All versions // 所有版本
-				})
-				return nil
-			}))
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependencies(&BumpDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: depbump.GetModeLatest, // All versions // 所有版本
+			})
 		},
 	})
 	cmd.AddCommand(directCmd)
@@ -89,30 +77,24 @@ func SetupBumpCmd(rootCmd *cobra.Command, config *worksexec.WorksExec) {
 	everyoneCmd := &cobra.Command{
 		Use:     "everyone",
 		Aliases: []string{"require", "requires"},
-		Short:   "Bump all dependencies to stable versions",
+		Short:   "Bump each dependencies to stable versions",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
-				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies(&BumpDepsConfig{
-					Cate: depbump.DepCateEveryone,
-					Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-				})
-				return nil
-			}))
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependencies(&BumpDepsConfig{
+				Cate: depbump.DepCateEveryone,
+				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
+			})
 		},
 	}
 	everyoneCmd.AddCommand(&cobra.Command{
 		Use:   "latest",
-		Short: "Bump all dependencies to latest versions (including prerelease)",
+		Short: "Bump each dependencies to latest versions (including prerelease)",
 		Run: func(cmd *cobra.Command, args []string) {
-			must.Done(config.ForeachSubExec(func(execConfig *osexec.ExecConfig, projectPath string) error {
-				kit := NewBumpKit(execConfig)
-				kit.SyncDependencies(&BumpDepsConfig{
-					Cate: depbump.DepCateEveryone,
-					Mode: depbump.GetModeLatest, // All versions // 所有版本
-				})
-				return nil
-			}))
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependencies(&BumpDepsConfig{
+				Cate: depbump.DepCateEveryone,
+				Mode: depbump.GetModeLatest, // All versions // 所有版本
+			})
 		},
 	})
 	cmd.AddCommand(everyoneCmd)

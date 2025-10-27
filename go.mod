@@ -11,7 +11,7 @@ require (
 	github.com/yyle88/erero v1.0.23
 	github.com/yyle88/eroticgo v0.0.5
 	github.com/yyle88/must v0.0.26
-	github.com/yyle88/neatjson v0.0.12
+	github.com/yyle88/neatjson v0.0.13
 	github.com/yyle88/osexec v0.0.32
 	github.com/yyle88/osexistpath v0.0.18
 	github.com/yyle88/rese v0.0.11
@@ -31,7 +31,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/yyle88/mutexmap v1.0.14 // indirect
-	github.com/yyle88/printgo v1.0.5 // indirect
+	github.com/yyle88/printgo v1.0.6 // indirect
 	github.com/yyle88/sure v0.0.40 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

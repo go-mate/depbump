@@ -31,13 +31,13 @@ func CompareVersions(v1, v2 string) int {
 // Returns true when required <= target (required version is compatible with target)
 // Empty required version is treated as compatible (returns true)
 // Accepts plain Go versions (e.g., 1.22, 1.22.8) from go.mod files
-// Uses official go/version.Compare within accurate toolchain version comparison
+// Uses standard go/version.Compare within accurate toolchain version comparison
 //
 // CanUseGoVersion 检查包的 Go 版本要求是否满足
 // 当 required <= target 时返回 true（需求版本与目标兼容）
 // 空的需求版本视为兼容（返回 true）
 // 接受纯数字格式的 Go 版本（如 1.22, 1.22.8）来自 go.mod 文件
-// 使用官方 go/version.Compare 进行准确的工具链版本比较
+// 使用标准 go/version.Compare 进行准确的工具链版本比较
 func CanUseGoVersion(required, target string) bool {
 	// Add "go" prefix to match go/version.Compare format
 	// 添加 "go" 前缀以匹配 go/version.Compare 格式
@@ -51,12 +51,12 @@ func CanUseGoVersion(required, target string) bool {
 }
 
 // IsStableVersion checks if a package version is a stable release
-// Returns true within valid semver versions without prerelease or +incompatible suffixes
+// Returns true when version is valid semver without prerelease and +incompatible suffixes
 // Filters out versions like v2.0.0-preview.4, v1.0.0-rc1, v1.0.0+incompatible
 // Expects version string with "v" prefix from go list -m -versions output
 //
 // IsStableVersion 检查包版本是否为稳定发布版本
-// 对没有预发布后缀或 +incompatible 标记的有效 semver 版本返回 true
+// 对没有预发布后缀和 +incompatible 标记的有效 semver 版本返回 true
 // 过滤掉如 v2.0.0-preview.4, v1.0.0-rc1, v1.0.0+incompatible 等版本
 // 期望带 "v" 前缀的版本字符串来自 go list -m -versions 输出
 func IsStableVersion(version string) bool {
