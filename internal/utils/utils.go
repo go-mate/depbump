@@ -1,12 +1,12 @@
-// Package utils: Common functions for depbump package management
+// Package utils: Common functions supporting depbump package management
 // Provides semantic version comparison and Go version matching checks
 // Implements standard Go module version comparison logic with pseudo-version support
-// Optimized for package analysis and toolchain matching validation
+// Enables efficient package analysis and toolchain matching validation
 //
 // utils: depbump 包管理的通用工具函数
 // 提供语义版本比较和 Go 版本匹配检查
 // 实现官方 Go 模块版本比较逻辑，支持伪版本
-// 为包分析和工具链匹配验证进行了优化
+// 用于高效的包分析和工具链匹配验证
 package utils
 
 import (
@@ -29,13 +29,13 @@ func CompareVersions(v1, v2 string) int {
 
 // CanUseGoVersion checks if a package's Go version requirement is satisfied
 // Returns true when required <= target (required version is compatible with target)
-// Empty required version is treated as compatible (returns true)
+// Missing required version is treated as compatible (returns true)
 // Accepts plain Go versions (e.g., 1.22, 1.22.8) from go.mod files
-// Uses standard go/version.Compare within accurate toolchain version comparison
+// Uses standard go/version.Compare to enable accurate toolchain version comparison
 //
 // CanUseGoVersion 检查包的 Go 版本要求是否满足
 // 当 required <= target 时返回 true（需求版本与目标兼容）
-// 空的需求版本视为兼容（返回 true）
+// 缺失的需求版本视为兼容（返回 true）
 // 接受纯数字格式的 Go 版本（如 1.22, 1.22.8）来自 go.mod 文件
 // 使用标准 go/version.Compare 进行准确的工具链版本比较
 func CanUseGoVersion(required, target string) bool {

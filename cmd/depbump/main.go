@@ -58,8 +58,9 @@ func main() {
 
 	// Detect project path from current DIR
 	// 从当前 DIR 检测项目路径
-	projectPath, _, ok := workspath.GetProjectPath(currentPath)
+	pathInfo, ok := workspath.GetProjectPath(currentPath)
 	must.True(ok)
+	projectPath := must.Nice(pathInfo.ProjectPath)
 	zaplog.LOG.Debug("project:", zap.String("path", projectPath))
 	must.Nice(projectPath)
 
@@ -78,8 +79,8 @@ func main() {
 		},
 	}
 
-	// Register subcommands
-	// 注册子命令
+	// Add subcommands to root
+	// 添加子命令到根命令
 	depbumpsubcmd.NewUpdateCmd(rootCmd, execConfig)
 	depsynctagcmd.SetupSyncCmd(rootCmd, execConfig)
 	depbumpkitcmd.SetupBumpCmd(rootCmd, execConfig)

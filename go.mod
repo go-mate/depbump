@@ -1,14 +1,14 @@
 module github.com/go-mate/depbump
 
-go 1.22.8
+go 1.25.0
 
 require (
-	github.com/go-mate/go-work v0.0.11
+	github.com/go-mate/go-work v0.0.12
 	github.com/go-xlan/gitgo v0.0.18
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
 	github.com/yyle88/done v1.0.27
-	github.com/yyle88/erero v1.0.23
+	github.com/yyle88/erero v1.0.24
 	github.com/yyle88/eroticgo v0.0.5
 	github.com/yyle88/must v0.0.26
 	github.com/yyle88/neatjson v0.0.13
@@ -16,11 +16,11 @@ require (
 	github.com/yyle88/osexistpath v0.0.18
 	github.com/yyle88/rese v0.0.11
 	github.com/yyle88/runpath v1.0.24
-	github.com/yyle88/syntaxgo v0.0.53
+	github.com/yyle88/syntaxgo v0.0.54
 	github.com/yyle88/tern v0.0.9
 	github.com/yyle88/zaplog v0.0.27
 	go.uber.org/zap v1.27.0
-	golang.org/x/mod v0.23.0
+	golang.org/x/mod v0.29.0
 )
 
 require (
@@ -34,5 +34,6 @@ require (
 	github.com/yyle88/printgo v1.0.6 // indirect
 	github.com/yyle88/sure v0.0.40 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

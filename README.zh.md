@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
 [![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
 [![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
-[![Supported Go Versions](https://img.shields.io/badge/Go-1.22--1.25-lightgrey.svg)](https://go.dev/)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://github.com/go-mate/depbump)
 [![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
 

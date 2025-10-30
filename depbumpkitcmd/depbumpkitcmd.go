@@ -1,7 +1,7 @@
 // Package depbumpkitcmd: Package checking and synchronization within Go modules
 // Provides intelligent package upgrade tools that prevent Go toolchain contagion
 // Implements version analysis and selective upgrades while maintaining Go version matching
-// Supports upgrade-first method to prevent package downgrades in production systems
+// Supports upgrade-first method preventing package downgrades in production systems
 //
 // depbumpkitcmd: Go 模块的包兼容性检查和同步
 // 提供智能包升级工具，防止 Go 工具链传染
@@ -260,8 +260,8 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 		version := versions[i]
 		zaplog.SUG.Debugln("checking", eroticgo.CYAN.Sprint(version))
 
-		// Filter out unstable versions when mode is UPDATE
-		// 当模式为 UPDATE 时过滤不稳定版本
+		// Skip unstable versions when mode is UPDATE
+		// 当模式为 UPDATE 时跳过不稳定版本
 		if mode == depbump.GetModeUpdate && !utils.IsStableVersion(version) {
 			zaplog.SUG.Debugln("skip unstable version", eroticgo.YELLOW.Sprint(version))
 			continue
