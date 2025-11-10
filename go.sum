@@ -37,12 +37,12 @@ github.com/yyle88/formatgo v1.0.27 h1:hlBtDh8n0UYKWlEH+M638fJjTzu8XhfAzYWsfUs71Z
 github.com/yyle88/formatgo v1.0.27/go.mod h1:QjfyrRvoCnKgw8Jr6ifHSQwAvIlLkNFjMI37rA9qSNU=
 github.com/yyle88/must v0.0.26 h1:bxUtYq4S5e7FjdQsAVCXPNZOA8YVItnQF+VXVqCSrps=
 github.com/yyle88/must v0.0.26/go.mod h1:SO20wxYD9sahO1crPOPlWxwJIyEx0qGtq1K/zgy/8UU=
-github.com/yyle88/mutexmap v1.0.14 h1:aBdhtKR0XmFAJFoyswfjAEg9dzBvdaUBXU3Iw50AlB0=
-github.com/yyle88/mutexmap v1.0.14/go.mod h1:QUYDuARLPlGj414kHewQ5tt8jkDxQXoai8H3C4Gg+yc=
+github.com/yyle88/mutexmap v1.0.15 h1:vqwtvomfzddcuBNg8hofWnILRFK2STJhWU7AufuNS50=
+github.com/yyle88/mutexmap v1.0.15/go.mod h1:NqwsKlK+NkL18i4BepeyCgtenXuw4N5UUnEX9XBfPA8=
 github.com/yyle88/neatjson v0.0.13 h1:+1Ihb43IZLkYAd+lapnvUJN20bTjSAkoTE/2gssBew8=
 github.com/yyle88/neatjson v0.0.13/go.mod h1:BOgA69f27Bd/yj2xnIWldratF3WwIrMKrBgo9eIZGb0=
-github.com/yyle88/osexec v0.0.32 h1:2+27JSN79e3SoQf8402lTJ6r0tkNc0zcYeYXVV61zK4=
-github.com/yyle88/osexec v0.0.32/go.mod h1:SFYaNeUMebG/VnfDWb1GaUBwhQISO/keioOrJV4AhB8=
+github.com/yyle88/osexec v0.0.33 h1:WE35qkV+4k5Xmymqui3uc0f2fyoraq/5TJWrZyqvJM0=
+github.com/yyle88/osexec v0.0.33/go.mod h1:8QXVlNErPCU0m908FL8b1HGetEPmxw0pcRrCvq76qrY=
 github.com/yyle88/osexistpath v0.0.18 h1:mBi01278glkoTlPE3xTbO5/GT9iGEowOZ5pL/29qas0=
 github.com/yyle88/osexistpath v0.0.18/go.mod h1:iTuJ9S07VIiq2azsSYUiheZtDXKlU819v9YAuSL40Uk=
 github.com/yyle88/printgo v1.0.6 h1:b53uyCdlijObvuyHVECiiEWQIDfuOpuHVrkNQIdR5bU=
@@ -69,8 +69,8 @@ golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 h1:mgKeJMpvi0yx/sU5GsxQ7p6s2
 golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546/go.mod h1:j/pmGrbnkbPtQfxEe5D0VQhZC6qKbfKifgD0oM7sR70=
 golang.org/x/mod v0.29.0 h1:HV8lRxZC4l2cr3Zq1LvtOsi/ThTgWnUk/y64QSs8GwA=
 golang.org/x/mod v0.29.0/go.mod h1:NyhrlYXJ2H4eJiRy/WDBO6HMqZQ6q9nk4JzS3NuCK+w=
-golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
-golang.org/x/sync v0.17.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
+golang.org/x/sync v0.18.0 h1:kr88TuHDroi+UVf+0hZnirlk8o8T+4MrK6mr60WkH/I=
+golang.org/x/sync v0.18.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
 golang.org/x/tools v0.38.0 h1:Hx2Xv8hISq8Lm16jvBZ2VQf+RLmbd7wVUsALibYI/IQ=
 golang.org/x/tools v0.38.0/go.mod h1:yEsQ/d/YK8cjh0L6rZlY8tgtlKiBNTL14pGDJPJpYQs=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

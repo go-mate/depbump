@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-mate/depbump"
 	"github.com/go-mate/depbump/internal/utils"
+	"github.com/go-mate/go-work/workspath"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/eroticgo"
 	"github.com/yyle88/must"
@@ -71,6 +72,17 @@ func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 			})
 		},
 	})
+	directCmd.AddCommand(&cobra.Command{
+		Use:   "recursive",
+		Short: "Bump direct dependencies across workspace modules",
+		Run: func(cmd *cobra.Command, args []string) {
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependenciesRecursive(&BumpDepsConfig{
+				Cate: depbump.DepCateDirect,
+				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
+			})
+		},
+	})
 	cmd.AddCommand(directCmd)
 
 	// Add everyone subcommand with latest sub-subcommand
@@ -94,6 +106,17 @@ func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 			kit.SyncDependencies(&BumpDepsConfig{
 				Cate: depbump.DepCateEveryone,
 				Mode: depbump.GetModeLatest, // All versions // 所有版本
+			})
+		},
+	})
+	everyoneCmd.AddCommand(&cobra.Command{
+		Use:   "recursive",
+		Short: "Bump each dependencies across workspace modules",
+		Run: func(cmd *cobra.Command, args []string) {
+			kit := NewBumpKit(execConfig)
+			kit.SyncDependenciesRecursive(&BumpDepsConfig{
+				Cate: depbump.DepCateEveryone,
+				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
 			})
 		},
 	})
@@ -163,6 +186,52 @@ func (c *BumpKit) SyncDependencies(config *BumpDepsConfig) {
 	zaplog.SUG.Infoln("🔧 Applying", string(config.Cate), "updates...")
 	must.Done(c.ApplyUpdates(deps))
 	zaplog.SUG.Infoln("✅", string(config.Cate), "updates success!")
+}
+
+// SyncDependenciesRecursive performs package analysis and upgrades across workspace modules
+// Scans workspace to find modules using workspath configuration and processes each in isolation
+// Applies intelligent upgrades while preventing toolchain version conflicts in each module
+//
+// SyncDependenciesRecursive 在工作区模块中执行包分析和升级
+// 扫描工作区使用 workspath 配置找到模块，并独立处理每个模块
+// 应用智能升级，同时防止每个模块中的工具链版本冲突
+func (c *BumpKit) SyncDependenciesRecursive(config *BumpDepsConfig) {
+	workPath := osmustexist.ROOT(c.execConfig.Path)
+
+	// Configure workspace scan with module detection options
+	// 配置工作区扫描和模块检测选项
+	options := workspath.NewOptions().
+		WithIncludeCurrentProject(true).
+		WithIncludeCurrentPackage(false).
+		WithIncludeSubModules(true).
+		WithExcludeNoGo(true).
+		WithDebugMode(false)
+
+	// Find modules using workspace path configuration
+	// 使用工作区路径配置找到模块
+	moduleRoots := workspath.GetModulePaths(workPath, options)
+
+	zaplog.SUG.Infoln("Recursive mode: found", eroticgo.CYAN.Sprint(len(moduleRoots)), "modules")
+
+	// Process each module with intelligent bump operations
+	// 对每个模块执行智能 bump 操作
+	for idx, modulePath := range moduleRoots {
+		zaplog.SUG.Infoln("Module", eroticgo.GREEN.Sprint(fmt.Sprintf("(%d/%d)", idx+1, len(moduleRoots))), "Processing module:", eroticgo.CYAN.Sprint(modulePath))
+
+		// Create module-specific execution configuration
+		// 创建模块特定的执行配置
+		moduleExecConfig := c.execConfig.NewConfig().WithPath(modulePath)
+
+		// Initialize BumpKit instance with module context
+		// 用模块上下文初始化 BumpKit 实例
+		moduleKit := NewBumpKit(moduleExecConfig)
+
+		// Execute package synchronization within module scope
+		// 在模块范围内执行包同步
+		moduleKit.SyncDependencies(config)
+	}
+
+	zaplog.SUG.Infoln("✅ Recursive updates completed across modules!")
 }
 
 // DependencyInfo represents comprehensive information about a package upgrade

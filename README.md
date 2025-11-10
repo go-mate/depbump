@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/go-mate/depbump/release.yml?branch=main&label=BUILD)](https://github.com/go-mate/depbump/actions/workflows/release.yml?query=branch%3Amain)
 [![GoDoc](https://pkg.go.dev/badge/github.com/go-mate/depbump)](https://pkg.go.dev/github.com/go-mate/depbump)
 [![Coverage Status](https://img.shields.io/coveralls/github/go-mate/depbump/main.svg)](https://coveralls.io/github/go-mate/depbump?branch=main)
-[![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://github.com/go-mate/depbump)
+[![Supported Go Versions](https://img.shields.io/badge/Go-1.25+-lightgrey.svg)](https://go.dev/)
 [![GitHub Release](https://img.shields.io/github/release/go-mate/depbump.svg)](https://github.com/go-mate/depbump/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-mate/depbump)](https://goreportcard.com/report/github.com/go-mate/depbump)
 
@@ -91,8 +91,20 @@ depbump bump
 # Upgrade direct dependencies with Go version matching
 depbump bump direct
 
+# Upgrade direct dependencies to latest versions
+depbump bump direct latest
+
+# Upgrade direct dependencies across workspace modules
+depbump bump direct recursive
+
 # Upgrade each package (direct + indirect) with Go version matching
 depbump bump everyone
+
+# Upgrade each package to latest versions
+depbump bump everyone latest
+
+# Upgrade each package across workspace modules
+depbump bump everyone recursive
 
 # Works in workspace environment (processes each module)
 cd workspace-root && depbump bump

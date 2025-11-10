@@ -24,11 +24,11 @@ import (
 
 // main initializes and executes the depbump command with workspace configuration
 // Sets up project path detection, workspace management, and command execution
-// Supports various update modes: basic, direct, comprehensive, intelligent with filtering options
+// Supports various update modes: basic, direct, comprehensive, intelligent, and recursive with filtering options
 //
 // main 初始化并执行 depbump 命令，配置工作区
 // 设置项目路径检测、工作区管理和命令执行
-// 支持各种更新模式：基础、直接、全部、智能，带过滤选项
+// 支持各种更新模式：基础、直接、全部、智能和递归，带过滤选项
 //
 // Usage examples:
 // go run main.go
@@ -43,8 +43,10 @@ import (
 // go run main.go bump
 // go run main.go bump direct
 // go run main.go bump direct latest
+// go run main.go bump direct recursive
 // go run main.go bump everyone
 // go run main.go bump everyone latest
+// go run main.go bump everyone recursive
 func main() {
 	// Get current working DIR
 	// 获取当前工作 DIR
