@@ -34,9 +34,9 @@ func NewUpdateCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 		Short: "Update dependencies",
 		Long:  "Update dependencies with various strategies and filtering options.",
 	}
-	updateCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "modules"}))
-	updateCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "directs"}))
-	updateCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "require", "requires"})) // Use "everyone" to avoid confusion with "each" // 使用 "everyone" 避免与 "each" 混淆
+	updateCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "M", "modules"}))
+	updateCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "D", "directs"}))
+	updateCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "E", "each"}))
 
 	// Add structured command
 	// 添加结构化命令
@@ -44,9 +44,9 @@ func NewUpdateCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 
 	// Add direct access commands
 	// 添加直接访问命令
-	rootCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "modules"}))
-	rootCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "directs"}))
-	rootCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "require", "requires"}))
+	rootCmd.AddCommand(NewUpdateModuleCmd(execConfig, []string{"module", "M", "modules"}))
+	rootCmd.AddCommand(NewUpdateDirectCmd(execConfig, []string{"direct", "D", "directs"}))
+	rootCmd.AddCommand(NewUpdateEveryoneCmd(execConfig, []string{"everyone", "E", "each"}))
 }
 
 // NewUpdateModuleCmd creates a command to update Go modules
@@ -81,15 +81,15 @@ func UpdateModules(execConfig *osexec.ExecConfig) {
 	must.Done(GoModTide(execConfig))
 }
 
-// updateModule executes go get -u for a single module with toolchain management
+// updateModule executes go get -u on a single module with toolchain management
 // Handles environment setup and output processing with success logging
 //
-// updateModule 为单个模块执行 go get -u，带工具链管理
+// updateModule 在单个模块上执行 go get -u，带工具链管理
 // 处理环境设置和输出处理，带成功日志记录
 func updateModule(execConfig *osexec.ExecConfig, toolchain string) {
 	var success = true
 	output := rese.V1(execConfig.NewConfig().
-		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
+		WithEnvs([]string{"GOTOOLCHAIN=" + toolchain}). // Use project Go version to suppress package Go version requirements // 用项目的go版本要求压制包的go版本要求
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := depbump.MatchUpgrade(line); matched {
@@ -181,7 +181,7 @@ func NewUpdateEveryoneCmd(execConfig *osexec.ExecConfig, usageNames []string) *c
 // setFlags configures command-line flags that handle package filtering and source management
 // Provides flags to handle GitLab/GitHub filtering and skip options
 //
-// setFlags 为包过滤和源代码控制配置命令行标志
+// setFlags 配置命令行标志以过滤包和控制源代码
 // 提供 GitLab/GitHub 过滤和跳过选项的标志
 func setFlags(cmd *cobra.Command, config *depbump.UpdateDepsConfig) {
 	cmd.Flags().BoolVarP(&config.GitlabOnly, "gitlab-only", "", false, "gitlab exclusive: update gitlab dependencies")

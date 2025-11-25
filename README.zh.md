@@ -42,18 +42,24 @@ cd project-path && depbump
 
 # 更新模块依赖（同上，显式指定）
 cd project-path && depbump module
+cd project-path && depbump M        # 短别名
 
 # 仅更新直接依赖
 cd project-path && depbump direct
+cd project-path && depbump D        # 短别名
 
 # 更新直接依赖到最新版本
 cd project-path && depbump direct latest
+cd project-path && depbump D latest
 
 # 更新每个依赖
 cd project-path && depbump everyone
+cd project-path && depbump E        # 短别名
+cd project-path && depbump each     # 同义词别名
 
 # 更新每个依赖到最新版本
 cd project-path && depbump everyone latest
+cd project-path && depbump E latest
 ```
 
 ### 高级用法
@@ -90,24 +96,39 @@ depbump bump
 
 # 仅升级直接依赖，带 Go 版本兼容性检查
 depbump bump direct
+depbump bump D              # 短别名
 
 # 升级直接依赖到最新版本
 depbump bump direct latest
+depbump bump D L            # 短别名
 
 # 在工作区所有模块中升级直接依赖
 depbump bump direct recursive
+depbump bump D R            # 短别名
 
 # 升级每个包（直接 + 间接），带 Go 版本兼容性检查
 depbump bump everyone
-
-# 升级每个包到最新版本
-depbump bump everyone latest
+depbump bump E              # 短别名
+depbump bump each           # 同义词别名
 
 # 在工作区所有模块中升级每个包
 depbump bump everyone recursive
+depbump bump E R            # 短别名
+depbump bump -E -R          # 标志方式（等效）
 
 # 在工作区环境中工作（处理每个模块）
 cd workspace-root && depbump bump
+```
+
+**便捷的标志方式：**
+```bash
+# 使用标志代替子命令（更简洁）
+depbump bump -E             # everyone（所有依赖）
+depbump bump -R             # recursive（工作区模块）
+depbump bump -E -R          # everyone + recursive
+depbump bump -L -R          # latest + recursive
+
+# 注意：-E 和 -L 不能同时使用（互斥）
 ```
 
 **新增 `bump` 命令特性：**
@@ -130,10 +151,10 @@ cd workspace-root && depbump bump
 
 ### 源过滤选项
 
-- `--github-only`: 仅更新 GitHub 上的依赖
-- `--skip-github`: 跳过 GitHub 上的依赖
-- `--gitlab-only`: 仅更新 GitLab 上的依赖
-- `--skip-gitlab`: 跳过 GitLab 上的依赖
+- `--github-only`: 更新托管在 GitHub 的依赖
+- `--skip-github`: 跳过托管在 GitHub 的依赖
+- `--gitlab-only`: 更新托管在 GitLab 的依赖
+- `--skip-gitlab`: 跳过托管在 GitLab 的依赖
 
 ## 功能说明
 
@@ -242,23 +263,23 @@ depbump everyone latest --skip-gitlab
 ---
 
 <!-- TEMPLATE (ZH) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
+<!-- VERSION 2025-11-25 03:52:28.131064 +0000 UTC -->
 
 ## 📄 许可证类型
 
-MIT 许可证。详见 [LICENSE](LICENSE)。
+MIT 许可证 - 详见 [LICENSE](LICENSE)。
 
 ---
 
-## 🤝 项目贡献
+## 💬 联系与反馈
 
 非常欢迎贡献代码！报告 BUG、建议功能、贡献代码：
 
-- 🐛 **发现问题？** 在 GitHub 上提交问题并附上重现步骤
-- 💡 **功能建议？** 创建 issue 讨论您的想法
-- 📖 **文档疑惑？** 报告问题，帮助我们改进文档
+- 🐛 **问题报告？** 在 GitHub 上提交问题并附上重现步骤
+- 💡 **新颖思路？** 创建 issue 讨论
+- 📖 **文档疑惑？** 报告问题，帮助我们完善文档
 - 🚀 **需要功能？** 分享使用场景，帮助理解需求
-- ⚡ **性能瓶颈？** 报告慢操作，帮助我们优化性能
+- ⚡ **性能瓶颈？** 报告慢操作，协助解决性能问题
 - 🔧 **配置困扰？** 询问复杂设置的相关问题
 - 📢 **关注进展？** 关注仓库以获取新版本和功能
 - 🌟 **成功案例？** 分享这个包如何改善工作流程
@@ -276,7 +297,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 4. **分支**：创建功能分支（`git checkout -b feature/xxx`）
 5. **编码**：实现您的更改并编写全面的测试
 6. **测试**：（Golang 项目）确保测试通过（`go test ./...`）并遵循 Go 代码风格约定
-7. **文档**：为面向用户的更改更新文档，并使用有意义的提交消息
+7. **文档**：面向用户的更改需要更新文档
 8. **暂存**：暂存更改（`git add .`）
 9. **提交**：提交更改（`git commit -m "Add feature xxx"`）确保向后兼容的代码
 10. **推送**：推送到分支（`git push origin feature/xxx`）
@@ -288,7 +309,7 @@ MIT 许可证。详见 [LICENSE](LICENSE)。
 
 ## 🌟 项目支持
 
-非常欢迎通过提交 Merge Request 和报告问题来为此项目做出贡献。
+非常欢迎通过提交 Merge Request 和报告问题来贡献此项目。
 
 **项目支持：**
 

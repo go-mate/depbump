@@ -54,8 +54,8 @@ func SyncTagsCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	return cmd
 }
 
-// SyncSubsCmd creates command for syncing dependencies with latest tag fallback
-// Uses latest tag when no specific tag is available for dependencies
+// SyncSubsCmd creates command to sync dependencies with latest tag fallback
+// Uses latest tag when dependencies have no specific tag
 //
 // SyncSubsCmd 创建用于同步依赖的命令，带有最新标签回退
 // 当依赖没有特定标签时使用最新标签

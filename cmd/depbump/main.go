@@ -3,7 +3,7 @@
 // Supports workspace operations and configurable update strategies
 //
 // main: depbump 命令行工具入口点
-// 为 Go 模块提供自动包升级和管理功能
+// 提供 Go 模块的自动包升级和管理功能
 // 支持工作区操作和可配置的更新策略
 package main
 
@@ -24,29 +24,17 @@ import (
 
 // main initializes and executes the depbump command with workspace configuration
 // Sets up project path detection, workspace management, and command execution
-// Supports various update modes: basic, direct, comprehensive, intelligent, and recursive with filtering options
+// Supports various update modes: module, direct, everyone with filtering and bump intelligence
 //
 // main 初始化并执行 depbump 命令，配置工作区
 // 设置项目路径检测、工作区管理和命令执行
-// 支持各种更新模式：基础、直接、全部、智能和递归，带过滤选项
+// 支持多种更新模式：module、direct、everyone，带过滤和智能升级功能
 //
-// Usage examples:
-// go run main.go
-// go run main.go direct
-// go run main.go direct --gitlab-only
-// go run main.go direct --skip-gitlab
-// go run main.go direct --github-only
-// go run main.go direct --skip-github
-// go run main.go sync
-// go run main.go sync tags
-// go run main.go sync subs
-// go run main.go bump
-// go run main.go bump direct
-// go run main.go bump direct latest
-// go run main.go bump direct recursive
-// go run main.go bump everyone
-// go run main.go bump everyone latest
-// go run main.go bump everyone recursive
+// Command structure supports both full names and short aliases (D/E/M/L/R)
+// Flag-based usage available with bump command (-E/-L/-R, note: -E and -L are exclusive)
+//
+// 命令结构支持全名和短别名（D/E/M/L/R）
+// bump 命令支持标志方式（-E/-L/-R，注意：-E 和 -L 互斥）
 func main() {
 	// Get current working DIR
 	// 获取当前工作 DIR

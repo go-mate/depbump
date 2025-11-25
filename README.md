@@ -42,18 +42,24 @@ cd project-path && depbump
 
 # Update module dependencies (same as above, explicit)
 cd project-path && depbump module
+cd project-path && depbump M        # Short alias // 短别名
 
 # Update direct packages
 cd project-path && depbump direct
+cd project-path && depbump D        # Short alias // 短别名
 
 # Update direct dependencies to latest versions
 cd project-path && depbump direct latest
+cd project-path && depbump D latest
 
 # Update each package
 cd project-path && depbump everyone
+cd project-path && depbump E        # Short alias // 短别名
+cd project-path && depbump each     # Alternative name // 别名
 
-# Update each package to latest versions  
+# Update each package to latest versions
 cd project-path && depbump everyone latest
+cd project-path && depbump E latest
 ```
 
 ### Advanced Usage
@@ -90,24 +96,39 @@ depbump bump
 
 # Upgrade direct dependencies with Go version matching
 depbump bump direct
+depbump bump D              # Short alias // 短别名
 
 # Upgrade direct dependencies to latest versions
 depbump bump direct latest
+depbump bump D L            # Short aliases // 短别名
 
 # Upgrade direct dependencies across workspace modules
 depbump bump direct recursive
+depbump bump D R            # Short aliases // 短别名
 
 # Upgrade each package (direct + indirect) with Go version matching
 depbump bump everyone
-
-# Upgrade each package to latest versions
-depbump bump everyone latest
+depbump bump E              # Short alias // 短别名
+depbump bump each           # Alternative name // 别名
 
 # Upgrade each package across workspace modules
 depbump bump everyone recursive
+depbump bump E R            # Short aliases // 短别名
+depbump bump -E -R          # Flag-based (equivalent) // 标志方式（等效）
 
 # Works in workspace environment (processes each module)
 cd workspace-root && depbump bump
+```
+
+**Convenient Flag-Based Usage:**
+```bash
+# Use flags instead of subcommands (more concise)
+depbump bump -E             # everyone (each package)
+depbump bump -R             # recursive (workspace modules)
+depbump bump -E -R          # everyone + recursive
+depbump bump -L -R          # latest + recursive
+
+# Note: -E and -L cannot be used at the same time (exclusive flags)
 ```
 
 **New `bump` Command Features:**
@@ -130,10 +151,10 @@ cd workspace-root && depbump bump
 
 ### Source Filtering Options
 
-- `--github-only`: Update GitHub-hosted packages
-- `--skip-github`: Skip GitHub-hosted dependencies
-- `--gitlab-only`: Update GitLab-hosted packages
-- `--skip-gitlab`: Skip GitLab-hosted dependencies
+- `--github-only`: Update packages hosted on GitHub
+- `--skip-github`: Skip dependencies hosted on GitHub
+- `--gitlab-only`: Update packages hosted on GitLab
+- `--skip-gitlab`: Skip dependencies hosted on GitLab
 
 ## Features
 
@@ -242,20 +263,20 @@ depbump everyone latest --skip-gitlab
 ---
 
 <!-- TEMPLATE (EN) BEGIN: STANDARD PROJECT FOOTER -->
-<!-- VERSION 2025-09-26 07:39:27.188023 +0000 UTC -->
+<!-- VERSION 2025-11-25 03:52:28.131064 +0000 UTC -->
 
 ## 📄 License
 
-MIT License. See [LICENSE](LICENSE).
+MIT License - see [LICENSE](LICENSE).
 
 ---
 
-## 🤝 Contributing
+## 💬 Contact & Feedback
 
 Contributions are welcome! Report bugs, suggest features, and contribute code:
 
-- 🐛 **Found a mistake?** Open an issue on GitHub with reproduction steps
-- 💡 **Have a feature idea?** Create an issue to discuss the suggestion
+- 🐛 **Mistake reports?** Open an issue on GitHub with reproduction steps
+- 💡 **Fresh ideas?** Create an issue to discuss
 - 📖 **Documentation confusing?** Report it so we can improve
 - 🚀 **Need new features?** Share the use cases to help us understand requirements
 - ⚡ **Performance issue?** Help us optimize through reporting slow operations
@@ -276,7 +297,7 @@ New code contributions, follow this process:
 4. **Branch**: Create a feature branch (`git checkout -b feature/xxx`).
 5. **Code**: Implement the changes with comprehensive tests
 6. **Testing**: (Golang project) Ensure tests pass (`go test ./...`) and follow Go code style conventions
-7. **Documentation**: Update documentation to support client-facing changes and use significant commit messages
+7. **Documentation**: Update documentation to support client-facing changes
 8. **Stage**: Stage changes (`git add .`)
 9. **Commit**: Commit changes (`git commit -m "Add feature xxx"`) ensuring backward compatible code
 10. **Push**: Push to the branch (`git push origin feature/xxx`).

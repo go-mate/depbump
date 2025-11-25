@@ -49,7 +49,7 @@ type Module struct {
 type Require struct {
 	Path     string `json:"Path"`     // Package path // 包路径
 	Version  string `json:"Version"`  // Current version // 当前版本
-	Indirect bool   `json:"Indirect"` // If indirect package // 是否为间接包
+	Indirect bool   `json:"Indirect"` // If indirect package // 是否是间接包
 }
 
 // ModuleInfo contains complete module dep information
@@ -78,10 +78,10 @@ func (a *ModuleInfo) GetToolchainVersion() string {
 }
 
 // GetDirectRequires filters and returns just direct (non-indirect) dependencies
-// Needed when updating explicit packages
+// Use this when updating explicit packages
 //
 // GetDirectRequires 过滤并返回仅直接（非间接）依赖
-// 适用于仅更新显式声明的依赖
+// 用于更新显式声明的依赖
 func (a *ModuleInfo) GetDirectRequires() []*Require {
 	var directs []*Require
 	for _, require := range a.Require {

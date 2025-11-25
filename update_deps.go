@@ -48,7 +48,7 @@ type UpdateConfig struct {
 // UpdateModule performs dep update on a specific module path
 // Uses specified toolchain and mode to execute go get commands with output monitoring
 //
-// UpdateModule 为特定模块路径执行依赖更新
+// UpdateModule 在特定模块路径上执行依赖更新
 // 使用指定的工具链和模式执行 go get 命令，并监控输出
 func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig *UpdateConfig) error {
 	// Validate required parameters
@@ -75,7 +75,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	// Execute command with toolchain configuration and output matching
 	// 执行命令，配置工具链并匹配输出
 	output, err := execConfig.NewConfig().
-		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 在升级时用项目的go版本要求压制包的go版本要求
+		WithEnvs([]string{"GOTOOLCHAIN=" + updateConfig.Toolchain}). // Use project Go version to suppress package Go version requirements // 用项目的go版本要求压制包的go版本要求
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := MatchUpgrade(line); matched {
@@ -210,7 +210,7 @@ func MatchGoDownloadingSdkInfo(outputLine string) (*GoDownloadingSdkInfo, bool) 
 // UpdateDepsConfig provides comprehensive configuration needed in batch package updates
 // Supports selective updating based on package categories and source filtering
 //
-// UpdateDepsConfig 为批量依赖更新提供全面的配置
+// UpdateDepsConfig 提供批量依赖更新的全面配置
 // 支持基于依赖类别和源过滤的选择性更新
 type UpdateDepsConfig struct {
 	Cate       DepCate // Package type scope // 包类型范围

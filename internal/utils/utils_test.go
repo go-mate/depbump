@@ -1,4 +1,4 @@
-// Package utils: Unit tests for version comparison and Go version matching functions
+// Package utils: Unit tests of version comparison and Go version matching functions
 // Tests semantic version comparison logic and toolchain version matching validation
 //
 // utils: 版本比较和 Go 版本匹配功能的单元测试

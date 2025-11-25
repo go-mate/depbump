@@ -68,7 +68,7 @@ func TestParseModuleFile(t *testing.T) {
 	require.Equal(t, syntaxgo_reflect.GetPkgPathV2[Module](), moduleFile.Module.Mod.Path)
 }
 
-// TestModuleInfo_GetDirectRequires tests filtering for direct (non-indirect) dependencies
+// TestModuleInfo_GetDirectRequires tests filtering of direct (non-indirect) dependencies
 // Validates that indirect dependencies are excluded from the result set
 //
 // TestModuleInfo_GetDirectRequires 测试过滤直接（非间接）依赖
@@ -81,7 +81,7 @@ func TestModuleInfo_GetDirectRequires(t *testing.T) {
 }
 
 // TestModuleInfo_GetScopedRequires tests dep filtering within type scope
-// Validates filtering logic for direct, indirect, and all dep types
+// Validates filtering logic of direct, indirect, and all dep types
 //
 // TestModuleInfo_GetScopedRequires 测试按类别范围过滤依赖
 // 验证直接、间接和所有依赖类别的过滤逻辑
