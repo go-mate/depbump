@@ -42,40 +42,45 @@ cd project-path && depbump
 
 # Update module dependencies (same as above, explicit)
 cd project-path && depbump module
-cd project-path && depbump M        # Short alias // 短别名
+
+# Update module dependencies across workspace
+cd project-path && depbump module R
 
 # Update direct packages
-cd project-path && depbump direct
-cd project-path && depbump D        # Short alias // 短别名
+cd project-path && depbump update direct
+cd project-path && depbump update D        # Short alias // 短别名
 
 # Update direct dependencies to latest versions
-cd project-path && depbump direct latest
-cd project-path && depbump D latest
+cd project-path && depbump update direct latest
+cd project-path && depbump update D L
 
 # Update each package
-cd project-path && depbump everyone
-cd project-path && depbump E        # Short alias // 短别名
-cd project-path && depbump each     # Alternative name // 别名
+cd project-path && depbump update everyone
+cd project-path && depbump update E        # Short alias // 短别名
 
 # Update each package to latest versions
-cd project-path && depbump everyone latest
-cd project-path && depbump E latest
+cd project-path && depbump update everyone latest
+cd project-path && depbump update E L
+
+# Update direct dependencies across workspace
+cd project-path && depbump update recursive
+cd project-path && depbump update R
 ```
 
 ### Advanced Usage
 
 ```bash
 # Update GitHub packages
-depbump direct --github-only
+depbump update D --github-only
 
 # Skip GitLab dependencies
-depbump direct --skip-gitlab
+depbump update D --skip-gitlab
 
 # Update GitLab packages
-depbump direct --gitlab-only
+depbump update D --gitlab-only
 
 # Skip GitHub dependencies
-depbump direct --skip-github
+depbump update D --skip-github
 
 # Sync workspace dependencies
 depbump sync
@@ -138,16 +143,22 @@ depbump bump -L -R          # latest + recursive
 - 📊 **Intelligent Analysis**: Shows version transitions with Go version requirements
 - 🔄 **Workspace Integration**: Processes multiple Go modules with ease
 
-### Package Categories
+### Command Structure
 
 - **module**: Update module dependencies using `go get -u ./...`
-- **direct**: Update direct (explicit) packages declared in go.mod - aliases: `directs`
-- **everyone**: Update each package - aliases: `require`, `requires`
-- **bump**: Smart Go version matching upgrades (default: direct)
-  - **bump direct**: Upgrade direct dependencies with version matching - aliases: `directs`
-  - **bump everyone**: Upgrade each package with version matching - aliases: `require`, `requires`
-- **latest**: Get latest available versions (might have breaking changes)
-- **update**: Get compatible updates (respects semantic versioning)
+  - **module R**: Update module dependencies across workspace
+- **update**: Update dependencies with filtering options
+  - **update D**: Update direct dependencies - aliases: `direct`, `directs`
+  - **update D L**: Update direct dependencies to latest versions
+  - **update D R**: Update direct dependencies across workspace
+  - **update E**: Update each package - aliases: `everyone`, `each`
+  - **update E L**: Update each package to latest versions
+  - **update E R**: Update each package across workspace
+  - **update R**: Recursive update (default: direct) - aliases: `recursive`
+  - **update R D**: Recursive direct dependencies
+  - **update R E**: Recursive each package
+- **sync**: Git tag synchronization
+- **bump**: Smart Go version matching upgrades
 
 ### Source Filtering Options
 
@@ -192,17 +203,29 @@ depbump
 # Update module dependencies (explicit)
 depbump module
 
+# Update module dependencies across workspace
+depbump module R
+
 # Update direct dependencies with compatible versions
-depbump direct
+depbump update D
 
 # Update direct dependencies to latest versions
-depbump direct latest
+depbump update D L
+
+# Update direct dependencies across workspace
+depbump update D R
 
 # Update each package including indirect ones
-depbump everyone
+depbump update E
 
 # Update each package to latest versions
-depbump everyone latest
+depbump update E L
+
+# Update each package across workspace
+depbump update E R
+
+# Recursive update (default: direct dependencies)
+depbump update R
 ```
 
 ### Sync Commands
@@ -222,14 +245,14 @@ depbump sync subs
 
 ```bash
 # GitHub/GitLab specific updates
-depbump direct --github-only      # GitHub packages
-depbump direct --skip-github      # Skip GitHub dependencies
-depbump direct --gitlab-only      # GitLab packages
-depbump direct --skip-gitlab      # Skip GitLab dependencies
+depbump update D --github-only      # GitHub packages
+depbump update D --skip-github      # Skip GitHub dependencies
+depbump update D --gitlab-only      # GitLab packages
+depbump update D --skip-gitlab      # Skip GitLab dependencies
 
 # Combine with latest mode
-depbump direct latest --github-only
-depbump everyone latest --skip-gitlab
+depbump update D L --github-only
+depbump update E L --skip-gitlab
 ```
 
 ## Troubleshooting
@@ -243,7 +266,7 @@ depbump everyone latest --skip-gitlab
 
 2. **Package Conflicts**
    - Run `go mod tidy -e` following updates to clean up
-   - Use `depbump direct` instead of `depbump everyone` to get safe updates
+   - Use `depbump update D` instead of `depbump update E` to get safe updates
    - Check go.mod when encountering incompatible version constraints
 
 3. **Workspace Issues**
@@ -253,11 +276,11 @@ depbump everyone latest --skip-gitlab
 
 ## Tips and Best Practices
 
-- **Start with direct packages**: Use `depbump direct` to get safe updates
+- **Start with direct packages**: Use `depbump update D` to get safe updates
 - **Test updates**: Run tests when updating packages
 - **Use version management**: Commit go.mod/go.sum before big updates
 - **Step-wise updates**: Update packages in steps, not at once
-- **Watch breaking changes**: Use `depbump direct` (compatible) before `depbump direct latest`
+- **Watch breaking changes**: Use `depbump update D` (compatible) before `depbump update D L`
 - **Workspace sync**: Run `depbump sync` when updating modules in workspaces
 
 ---

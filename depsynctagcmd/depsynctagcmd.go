@@ -20,12 +20,10 @@ import (
 	"github.com/yyle88/zaplog"
 )
 
-// SetupSyncCmd creates sync command and adds it to root command
-// Provides tag-based synchronization subcommands
+// NewSyncCmd creates sync command with tag-based synchronization subcommands
 //
-// SetupSyncCmd 创建同步命令并添加到根命令
-// 提供基于标签的同步子命令
-func SetupSyncCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
+// NewSyncCmd 创建同步命令，包含基于标签的同步子命令
+func NewSyncCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "dep sync",
@@ -33,8 +31,7 @@ func SetupSyncCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 	}
 	cmd.AddCommand(SyncTagsCmd(execConfig))
 	cmd.AddCommand(SyncSubsCmd(execConfig))
-
-	rootCmd.AddCommand(cmd)
+	return cmd
 }
 
 // SyncTagsCmd creates command that synchronizes dependencies to the latest Git tags

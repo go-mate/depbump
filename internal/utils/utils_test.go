@@ -37,7 +37,7 @@ func TestCanUseGoVersion(t *testing.T) {
 	require.True(t, CanUseGoVersion("1.22rc1", "1.22.0"))
 	require.True(t, CanUseGoVersion("1.22.0", "1.22.1"))
 
-	// Empty required version // 空的需求版本
+	// Missing required version // 缺失的需求版本
 	require.True(t, CanUseGoVersion("", "1.20"))
 }
 

@@ -42,40 +42,45 @@ cd project-path && depbump
 
 # 更新模块依赖（同上，显式指定）
 cd project-path && depbump module
-cd project-path && depbump M        # 短别名
+
+# 在工作区所有模块中更新模块依赖
+cd project-path && depbump module R
 
 # 仅更新直接依赖
-cd project-path && depbump direct
-cd project-path && depbump D        # 短别名
+cd project-path && depbump update direct
+cd project-path && depbump update D        # 短别名
 
 # 更新直接依赖到最新版本
-cd project-path && depbump direct latest
-cd project-path && depbump D latest
+cd project-path && depbump update direct latest
+cd project-path && depbump update D L
 
 # 更新每个依赖
-cd project-path && depbump everyone
-cd project-path && depbump E        # 短别名
-cd project-path && depbump each     # 同义词别名
+cd project-path && depbump update everyone
+cd project-path && depbump update E        # 短别名
 
 # 更新每个依赖到最新版本
-cd project-path && depbump everyone latest
-cd project-path && depbump E latest
+cd project-path && depbump update everyone latest
+cd project-path && depbump update E L
+
+# 在工作区所有模块中更新直接依赖
+cd project-path && depbump update recursive
+cd project-path && depbump update R
 ```
 
 ### 高级用法
 
 ```bash
 # 仅更新 GitHub 依赖
-depbump direct --github-only
+depbump update D --github-only
 
 # 跳过 GitLab 依赖
-depbump direct --skip-gitlab
+depbump update D --skip-gitlab
 
 # 仅更新 GitLab 依赖
-depbump direct --gitlab-only
+depbump update D --gitlab-only
 
 # 跳过 GitHub 依赖
-depbump direct --skip-github
+depbump update D --skip-github
 
 # 同步工作区依赖
 depbump sync
@@ -138,16 +143,22 @@ depbump bump -L -R          # latest + recursive
 - 📊 **智能分析**: 显示版本转换和 Go 版本要求
 - 🔄 **工作区集成**: 高效处理多个 Go 模块
 
-### 依赖类别
+### 命令结构
 
 - **module**: 使用 `go get -u ./...` 更新模块依赖
-- **direct**: 仅更新 go.mod 中直接声明的依赖 - 别名：`directs`
-- **everyone**: 更新每个依赖 - 别名：`require`, `requires`
-- **bump**: 智能 Go 版本兼容性升级（默认：直接依赖）
-  - **bump direct**: 升级直接依赖，带版本兼容性检查 - 别名：`directs`
-  - **bump everyone**: 升级每个包，带版本兼容性检查 - 别名：`require`, `requires`
-- **latest**: 获取最新可用版本（可能有破坏性更改）
-- **update**: 获取兼容的更新版本（遵循语义化版本）
+  - **module R**: 在工作区所有模块中更新模块依赖
+- **update**: 带过滤选项的依赖更新
+  - **update D**: 更新直接依赖 - 别名：`direct`, `directs`
+  - **update D L**: 更新直接依赖到最新版本
+  - **update D R**: 在工作区所有模块中更新直接依赖
+  - **update E**: 更新每个依赖 - 别名：`everyone`, `each`
+  - **update E L**: 更新每个依赖到最新版本
+  - **update E R**: 在工作区所有模块中更新每个依赖
+  - **update R**: 递归更新（默认：直接依赖） - 别名：`recursive`
+  - **update R D**: 递归更新直接依赖
+  - **update R E**: 递归更新每个依赖
+- **sync**: Git 标签同步
+- **bump**: 智能 Go 版本兼容性升级
 
 ### 源过滤选项
 
@@ -192,17 +203,29 @@ depbump
 # 更新模块依赖（显式指定）
 depbump module
 
+# 在工作区所有模块中更新模块依赖
+depbump module R
+
 # 更新直接依赖到兼容版本
-depbump direct
+depbump update D
 
 # 更新直接依赖到最新版本
-depbump direct latest
+depbump update D L
+
+# 在工作区所有模块中更新直接依赖
+depbump update D R
 
 # 更新每个包包括间接依赖
-depbump everyone
+depbump update E
 
 # 更新每个包到最新版本
-depbump everyone latest
+depbump update E L
+
+# 在工作区所有模块中更新每个包
+depbump update E R
+
+# 递归更新（默认：直接依赖）
+depbump update R
 ```
 
 ### 同步命令
@@ -222,14 +245,14 @@ depbump sync subs
 
 ```bash
 # GitHub/GitLab 特定更新
-depbump direct --github-only      # 仅更新 GitHub 依赖
-depbump direct --skip-github      # 跳过 GitHub 依赖
-depbump direct --gitlab-only      # 仅更新 GitLab 依赖
-depbump direct --skip-gitlab      # 跳过 GitLab 依赖
+depbump update D --github-only      # 仅更新 GitHub 依赖
+depbump update D --skip-github      # 跳过 GitHub 依赖
+depbump update D --gitlab-only      # 仅更新 GitLab 依赖
+depbump update D --skip-gitlab      # 跳过 GitLab 依赖
 
 # 与 latest 模式结合
-depbump direct latest --github-only
-depbump everyone latest --skip-gitlab
+depbump update D L --github-only
+depbump update E L --skip-gitlab
 ```
 
 ## 故障排除
@@ -243,7 +266,7 @@ depbump everyone latest --skip-gitlab
 
 2. **依赖冲突**
    - 更新后运行 `go mod tidy -e` 进行清理
-   - 使用 `depbump direct` 而非 `depbump everyone` 以获得更安全的更新
+   - 使用 `depbump update D` 而非 `depbump update E` 以获得更安全的更新
    - 检查 go.mod 中的不兼容版本约束
 
 3. **工作区问题**
@@ -253,11 +276,11 @@ depbump everyone latest --skip-gitlab
 
 ## 技巧和最佳实践
 
-- **从直接依赖开始**: 使用 `depbump direct` 进行更安全的更新
+- **从直接依赖开始**: 使用 `depbump update D` 进行更安全的更新
 - **更新后测试**: 依赖更新后务必运行测试
 - **使用版本控制**: 大型更新前提交 go.mod/go.sum
 - **渐进式更新**: 逐步更新依赖，不要一次全部更新
-- **监控破坏性变更**: 先使用 `depbump direct`（兼容）再使用 `depbump direct latest`
+- **监控破坏性变更**: 先使用 `depbump update D`（兼容）再使用 `depbump update D L`
 - **工作区一致性**: 在工作区中更新模块后运行 `depbump sync`
 
 ---

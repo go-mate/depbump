@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/go-mate/depbump/depbumpkitcmd"
+	"github.com/go-mate/depbump/depbumpmodcmd"
 	"github.com/go-mate/depbump/depbumpsubcmd"
 	"github.com/go-mate/depbump/depsynctagcmd"
 	"github.com/go-mate/go-work/workspath"
@@ -24,17 +25,11 @@ import (
 
 // main initializes and executes the depbump command with workspace configuration
 // Sets up project path detection, workspace management, and command execution
-// Supports various update modes: module, direct, everyone with filtering and bump intelligence
+// Commands: module, update (D/E/R), sync, bump
 //
 // main 初始化并执行 depbump 命令，配置工作区
 // 设置项目路径检测、工作区管理和命令执行
-// 支持多种更新模式：module、direct、everyone，带过滤和智能升级功能
-//
-// Command structure supports both full names and short aliases (D/E/M/L/R)
-// Flag-based usage available with bump command (-E/-L/-R, note: -E and -L are exclusive)
-//
-// 命令结构支持全名和短别名（D/E/M/L/R）
-// bump 命令支持标志方式（-E/-L/-R，注意：-E 和 -L 互斥）
+// 命令：module、update (D/E/R)、sync、bump
 func main() {
 	// Get current working DIR
 	// 获取当前工作 DIR
@@ -65,15 +60,16 @@ func main() {
 		Short: "Go package management assistant",
 		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
 		Run: func(cmd *cobra.Command, args []string) {
-			depbumpsubcmd.UpdateModules(execConfig)
+			depbumpmodcmd.UpdateModules(execConfig)
 		},
 	}
 
 	// Add subcommands to root
 	// 添加子命令到根命令
-	depbumpsubcmd.NewUpdateCmd(rootCmd, execConfig)
-	depsynctagcmd.SetupSyncCmd(rootCmd, execConfig)
-	depbumpkitcmd.SetupBumpCmd(rootCmd, execConfig)
+	rootCmd.AddCommand(depbumpmodcmd.NewModuleCmd(execConfig))
+	rootCmd.AddCommand(depbumpsubcmd.NewUpdateCmd(execConfig))
+	rootCmd.AddCommand(depsynctagcmd.NewSyncCmd(execConfig))
+	rootCmd.AddCommand(depbumpkitcmd.NewBumpCmd(execConfig))
 
 	// Execute CLI application
 	// 执行 CLI 应用程序

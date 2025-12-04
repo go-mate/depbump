@@ -31,12 +31,10 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-// SetupBumpCmd creates and configures the bump command handling package management
-// Provides intelligent package analysis and upgrade capabilities
+// NewBumpCmd creates bump command with intelligent package analysis and upgrade capabilities
 //
-// SetupBumpCmd 创建并配置用于包管理的 bump 命令
-// 提供智能包分析和升级功能
-func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
+// NewBumpCmd 创建 bump 命令，提供智能包分析和升级功能
+func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	// Flags defining bump actions
 	// 定义 bump 行为的标志
 	var (
@@ -49,8 +47,8 @@ func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 		Use:   "bump",
 		Short: "Bump dependencies to stable versions with Go version matching",
 		Run: func(cmd *cobra.Command, args []string) {
-			// Ensure everyone and latest flags are not used together
-			// 确保 everyone 和 latest 标志不同时使用
+			// Ensure everyone and latest flags cannot be combined
+			// 确保 everyone 和 latest 标志不能同时使用
 			must.Different(useEveryone, useLatest)
 
 			kit := NewBumpKit(execConfig)
@@ -60,8 +58,8 @@ func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 				Mode: tern.BVV(useLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
 			}
 
-			// Execute recursive or regular sync
-			// 执行递归或常规同步
+			// Execute recursive sync when enabled, otherwise standard sync
+			// 启用时执行递归同步，否则执行标准同步
 			if useRecursive {
 				kit.SyncDependenciesRecursive(config)
 			} else {
@@ -154,7 +152,7 @@ func SetupBumpCmd(rootCmd *cobra.Command, execConfig *osexec.ExecConfig) {
 	})
 	cmd.AddCommand(everyoneCmd)
 
-	rootCmd.AddCommand(cmd)
+	return cmd
 }
 
 // BumpDepsConfig provides configuration needed in intelligent package bump operations
@@ -299,8 +297,8 @@ func (c *BumpKit) AnalyzeDependencies(cate depbump.DepCate, mode depbump.GetMode
 	zaplog.SUG.Infoln("analyzing", eroticgo.CYAN.Sprint(len(requires)), string(cate), "dependencies")
 
 	for idx, req := range requires {
-		// Display progress with enhanced user experience
-		// 显示进度增强用户体验
+		// Display progress with enhanced UX feedback
+		// 显示进度，增强交互体验
 		progress := fmt.Sprintf("(%d/%d)", idx+1, len(requires))
 		zaplog.SUG.Infoln(progress, "analyzing", eroticgo.GREEN.Sprint(req.Path))
 
@@ -341,11 +339,11 @@ type BestPackageVersion struct {
 }
 
 // SelectBestPackageVersion finds the best matching version within a given package
-// Implements upgrade-first approach with Go version compatibility constraints
+// Implements upgrade-first approach with Go version compatible constraints
 // Returns best available version, maintains current version when upgrade is not possible
 //
 // SelectBestPackageVersion 找到给定包的最优兼容版本
-// 实现仅升级方式，同时遵守 Go 版本兼容性约束
+// 实现仅升级方式，同时遵守 Go 版本兼容约束
 // 返回最佳可用版本，如果无法升级则保持当前版本
 func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, currentVersion string, mode depbump.GetMode) *BestPackageVersion {
 	osmustexist.ROOT(c.execConfig.Path)
@@ -375,8 +373,8 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 
 		goReq := c.GetPackageGoRequirement(pkg, version)
 		if utils.CanUseGoVersion(goReq, c.TargetGoVersion) {
-			// Return version when found version is newer than or equal to current version
-			// 只有当找到的版本比当前版本新或相等时才返回
+			// Return version when found version is same as current, and also above it
+			// 当找到的版本和当前版本相同或更高时才返回
 			if utils.CompareVersions(version, currentVersion) >= 0 {
 				packageVersion := &BestPackageVersion{
 					Version:   version,
@@ -447,7 +445,7 @@ func (c *BumpKit) GetPackageGoRequirement(pkgPath, version string) string {
 
 	zaplog.SUG.Debugln("downloading", eroticgo.CYAN.Sprint(pkgPath+"@"+version))
 
-	// 直接获取模块的 go.mod 信息
+	// Fetch module go.mod info // 直接获取模块的 go.mod 信息
 	output, err := c.execConfig.Exec("go", "mod", "download", "-json", pkgPath+"@"+version)
 	if err != nil {
 		zaplog.SUG.Warnln("download failed", eroticgo.RED.Sprint(pkgPath+"@"+version), err.Error())
@@ -507,6 +505,6 @@ func (c *BumpKit) ApplyUpdates(deps []*DependencyInfo) error {
 	}
 
 	zaplog.SUG.Infoln("cleaning up module dependencies")
-	rese.V1(c.execConfig.Exec("go", "mod", "tidy"))
+	rese.V1(c.execConfig.Exec("go", "mod", "tidy", "-e"))
 	return nil
 }

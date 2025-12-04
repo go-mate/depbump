@@ -149,22 +149,22 @@ type ToolchainVersionMismatch struct {
 	Toolchain         string // GOTOOLCHAIN environment value // GOTOOLCHAIN 环境工具值
 }
 
-// MatchToolchainVersionMismatch parses toolchain version conflict error messages
-// Extracts structured information from go command error output about version mismatches
+// MatchToolchainVersionMismatch parses toolchain version conflict messages
+// Extracts structured information about version mismatches from go command output
 //
-// MatchToolchainVersionMismatch 解析工具链版本冲突错误消息
-// 从 go 命令错误输出中提取版本不匹配的结构化信息
+// MatchToolchainVersionMismatch 解析工具链版本冲突消息
+// 从 go 命令输出中提取版本不匹配的结构化信息
 func MatchToolchainVersionMismatch(outputLine string) (*ToolchainVersionMismatch, bool) {
 	pattern := `^go: ([^\s]+)@([^\s]+) requires go >= ([^\s]+) \(running go ([^\s]+); GOTOOLCHAIN=([^\s]+)\)$`
 	re := regexp.MustCompile(pattern)
 
-	// 匹配输入字符串
+	// Match the input string // 匹配输入字符串
 	matches := re.FindStringSubmatch(outputLine)
 	if len(matches) != 6 {
 		return nil, false
 	}
 
-	// 提取信息并返回
+	// Extract info and return // 提取信息并返回
 	return &ToolchainVersionMismatch{
 		ModulePath:        matches[1],
 		ModuleVersion:     matches[2],
@@ -222,10 +222,10 @@ type UpdateDepsConfig struct {
 }
 
 // UpdateDeps orchestrates batch package updates according to configuration
-// Processes filtered dependencies with progress tracking and error collection
+// Processes filtered dependencies with progress tracking and warning collection
 //
 // UpdateDeps 根据配置编排批量依赖更新
-// 处理过滤后的依赖，带有进度跟踪和错误收集
+// 处理过滤后的依赖，带有进度跟踪和警告收集
 func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, updateDepsConfig *UpdateDepsConfig) {
 	must.Nice(execConfig)
 	must.Nice(updateDepsConfig)
