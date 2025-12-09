@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/go-mate/depbump/internal/utils"
 	"github.com/yyle88/erero"
 	"github.com/yyle88/eroticgo"
 	"github.com/yyle88/must"
@@ -70,7 +71,7 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 	}, func() []string {
 		return []string{"go", "get", "-u", modulePath}
 	})
-	zaplog.LOG.Debug("update-module:", zap.String("module-path", modulePath), zap.Strings("commands", commands))
+	zaplog.LOG.Debug("Updating module", zap.String("module-path", modulePath), zap.Strings("commands", commands))
 
 	// Execute command with toolchain configuration and output matching
 	// 执行命令，配置工具链并匹配输出
@@ -79,15 +80,15 @@ func UpdateModule(execConfig *osexec.ExecConfig, modulePath string, updateConfig
 		WithMatchMore(true).
 		WithMatchPipe(func(line string) bool {
 			if upgradeInfo, matched := MatchUpgrade(line); matched {
-				zaplog.SUG.Debugln("match-upgrade-output-message:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
+				zaplog.SUG.Debugln("Upgrade detected:", eroticgo.GREEN.Sprint(neatjsons.S(upgradeInfo)))
 				return true
 			}
 			if waToolchain, matched := MatchToolchainVersionMismatch(line); matched {
-				zaplog.SUG.Debugln("go-toolchain-mismatch-output:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
+				zaplog.SUG.Debugln("Toolchain mismatch:", eroticgo.RED.Sprint(neatjsons.S(waToolchain)))
 				return true
 			}
 			if sdkInfo, matched := MatchGoDownloadingSdkInfo(line); matched {
-				zaplog.SUG.Debugln("go-downloading-sdk-info:", eroticgo.CYAN.Sprint(neatjsons.S(sdkInfo)))
+				zaplog.SUG.Debugln("Downloading SDK:", eroticgo.CYAN.Sprint(neatjsons.S(sdkInfo)))
 				return true
 			}
 			return false
@@ -241,26 +242,25 @@ func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, update
 	var warnings []*Warning
 	requires := moduleInfo.GetScopedRequires(updateDepsConfig.Cate)
 	for idx, dep := range requires {
-		processMessage := fmt.Sprintf("(%d/%d)", idx, len(requires))
-		zaplog.LOG.Debug("upgrade:", zap.String("idx", processMessage), zap.String("path", dep.Path), zap.String("from", dep.Version))
+		zaplog.LOG.Debug("Processing", zap.String("progress", utils.UIProgress(idx, len(requires))), zap.String("path", dep.Path), zap.String("from", dep.Version))
 
 		if updateDepsConfig.GitlabOnly && !strings.HasPrefix(dep.Path, "gitlab.") {
-			zaplog.LOG.Debug("skip-non-gitlab:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			zaplog.LOG.Debug("Skip non-GitLab", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
 		}
 
 		if updateDepsConfig.SkipGitlab && strings.HasPrefix(dep.Path, "gitlab.") {
-			zaplog.LOG.Debug("skip-gitlab-dep:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			zaplog.LOG.Debug("Skip GitLab", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
 		}
 
 		if updateDepsConfig.GithubOnly && !strings.HasPrefix(dep.Path, "github.com/") {
-			zaplog.LOG.Debug("skip-non-github:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			zaplog.LOG.Debug("Skip non-GitHub", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
 		}
 
 		if updateDepsConfig.SkipGithub && strings.HasPrefix(dep.Path, "github.com/") {
-			zaplog.LOG.Debug("skip-github-dep:", zap.String("path", dep.Path), zap.String("from", dep.Version))
+			zaplog.LOG.Debug("Skip GitHub", zap.String("path", dep.Path), zap.String("from", dep.Version))
 			continue
 		}
 
@@ -278,7 +278,7 @@ func UpdateDeps(execConfig *osexec.CommandConfig, moduleInfo *ModuleInfo, update
 	if len(warnings) > 0 {
 		eroticgo.RED.ShowMessage("WARNING>>>")
 		for idx, warning := range warnings {
-			zaplog.LOG.Debug("warning:", zap.Int("idx", idx), zap.String("path", warning.Path))
+			zaplog.LOG.Debug("Update warning", zap.String("progress", utils.UIProgress(idx, len(warnings))), zap.String("path", warning.Path))
 			fmt.Println(eroticgo.RED.Sprint(warning.Warn))
 		}
 		eroticgo.RED.ShowMessage("<<<WARNING")

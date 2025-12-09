@@ -44,46 +44,45 @@ cd project-path && depbump
 cd project-path && depbump module
 
 # 在工作区所有模块中更新模块依赖
-cd project-path && depbump module R
+cd project-path && depbump module -R
 
-# 仅更新直接依赖
-cd project-path && depbump update direct
-cd project-path && depbump update D        # 短别名
+# 更新直接依赖（默认，-D 可选）
+cd project-path && depbump update
+cd project-path && depbump update -D
 
-# 更新直接依赖到最新版本
-cd project-path && depbump update direct latest
-cd project-path && depbump update D L
+# 更新每个依赖（直接 + 间接）
+cd project-path && depbump update -E
 
-# 更新每个依赖
-cd project-path && depbump update everyone
-cd project-path && depbump update E        # 短别名
+# 更新到最新版本（包含预发布版本）
+cd project-path && depbump update -L
 
-# 更新每个依赖到最新版本
-cd project-path && depbump update everyone latest
-cd project-path && depbump update E L
+# 在工作区所有模块中更新
+cd project-path && depbump update -R
 
-# 在工作区所有模块中更新直接依赖
-cd project-path && depbump update recursive
-cd project-path && depbump update R
+# 组合标志
+cd project-path && depbump update -D -R    # 直接依赖 + 递归
+cd project-path && depbump update -DR      # 同上
+cd project-path && depbump update -E -R    # 每个依赖 + 递归
+cd project-path && depbump update -ER      # 同上
 ```
 
 ### 高级用法
 
 ```bash
 # 仅更新 GitHub 依赖
-depbump update D --github-only
+depbump update --github-only
 
 # 跳过 GitLab 依赖
-depbump update D --skip-gitlab
+depbump update --skip-gitlab
 
 # 仅更新 GitLab 依赖
-depbump update D --gitlab-only
+depbump update --gitlab-only
 
 # 跳过 GitHub 依赖
-depbump update D --skip-github
+depbump update --skip-github
 
-# 同步工作区依赖
-depbump sync
+# 与其他标志组合
+depbump update -E --github-only
 
 # 同步依赖到 Git 标签版本
 depbump sync tags
@@ -99,44 +98,25 @@ depbump sync subs
 # 防止升级依赖时的 Go 工具链传染
 depbump bump
 
-# 仅升级直接依赖，带 Go 版本兼容性检查
-depbump bump direct
-depbump bump D              # 短别名
-
-# 升级直接依赖到最新版本
-depbump bump direct latest
-depbump bump D L            # 短别名
-
-# 在工作区所有模块中升级直接依赖
-depbump bump direct recursive
-depbump bump D R            # 短别名
-
 # 升级每个包（直接 + 间接），带 Go 版本兼容性检查
-depbump bump everyone
-depbump bump E              # 短别名
-depbump bump each           # 同义词别名
+depbump bump -E
 
-# 在工作区所有模块中升级每个包
-depbump bump everyone recursive
-depbump bump E R            # 短别名
-depbump bump -E -R          # 标志方式（等效）
+# 升级到最新版本（包含预发布版本）
+depbump bump -L
 
-# 在工作区环境中工作（处理每个模块）
-cd workspace-root && depbump bump
+# 在工作区所有模块中升级
+depbump bump -R
+
+# 组合标志
+depbump bump -D -R          # 直接依赖 + 递归
+depbump bump -DR            # 同上
+depbump bump -E -R          # 每个依赖 + 递归
+depbump bump -ER            # 同上
+
+# 注意：-D 和 -E 互斥，-E 和 -L 互斥
 ```
 
-**便捷的标志方式：**
-```bash
-# 使用标志代替子命令（更简洁）
-depbump bump -E             # everyone（所有依赖）
-depbump bump -R             # recursive（工作区模块）
-depbump bump -E -R          # everyone + recursive
-depbump bump -L -R          # latest + recursive
-
-# 注意：-E 和 -L 不能同时使用（互斥）
-```
-
-**新增 `bump` 命令特性：**
+**`bump` 命令特性：**
 - 🧠 **Go 版本兼容性**: 分析每个依赖的 Go 版本要求
 - 🚫 **工具链传染防护**: 避免强制工具链变更的升级
 - ⬆️ **仅升级方式**: 永不降级现有依赖
@@ -145,27 +125,26 @@ depbump bump -L -R          # latest + recursive
 
 ### 命令结构
 
+- **depbump**: 默认模块更新（同 `depbump module`）
 - **module**: 使用 `go get -u ./...` 更新模块依赖
-  - **module R**: 在工作区所有模块中更新模块依赖
+  - `-R`: 在工作区所有模块中更新
 - **update**: 带过滤选项的依赖更新
-  - **update D**: 更新直接依赖 - 别名：`direct`, `directs`
-  - **update D L**: 更新直接依赖到最新版本
-  - **update D R**: 在工作区所有模块中更新直接依赖
-  - **update E**: 更新每个依赖 - 别名：`everyone`, `each`
-  - **update E L**: 更新每个依赖到最新版本
-  - **update E R**: 在工作区所有模块中更新每个依赖
-  - **update R**: 递归更新（默认：直接依赖） - 别名：`recursive`
-  - **update R D**: 递归更新直接依赖
-  - **update R E**: 递归更新每个依赖
-- **sync**: Git 标签同步
+  - `-D`: 更新直接依赖（默认）
+  - `-E`: 更新每个依赖（直接 + 间接）
+  - `-L`: 使用最新版本（包含预发布版本）
+  - `-R`: 在工作区所有模块中更新
+  - `--github-only` / `--skip-github`: GitHub 过滤
+  - `--gitlab-only` / `--skip-gitlab`: GitLab 过滤
+  - 注意：`-D` 和 `-E` 互斥
 - **bump**: 智能 Go 版本兼容性升级
-
-### 源过滤选项
-
-- `--github-only`: 更新托管在 GitHub 的依赖
-- `--skip-github`: 跳过托管在 GitHub 的依赖
-- `--gitlab-only`: 更新托管在 GitLab 的依赖
-- `--skip-gitlab`: 跳过托管在 GitLab 的依赖
+  - `-D`: 升级直接依赖（默认）
+  - `-E`: 升级每个依赖（直接 + 间接）
+  - `-L`: 使用最新版本（包含预发布版本）
+  - `-R`: 在工作区所有模块中升级
+  - 注意：`-D` 和 `-E` 互斥，`-E` 和 `-L` 互斥
+- **sync**: Git 标签同步
+  - **tags**: 同步到 Git 标签版本
+  - **subs**: 同步，缺失标签时使用最新版本
 
 ## 功能说明
 
@@ -204,36 +183,45 @@ depbump
 depbump module
 
 # 在工作区所有模块中更新模块依赖
-depbump module R
+depbump module -R
 
-# 更新直接依赖到兼容版本
-depbump update D
+# 更新直接依赖（默认）
+depbump update
 
-# 更新直接依赖到最新版本
-depbump update D L
+# 更新每个依赖（直接 + 间接）
+depbump update -E
 
-# 在工作区所有模块中更新直接依赖
-depbump update D R
+# 更新到最新版本
+depbump update -L
 
-# 更新每个包包括间接依赖
-depbump update E
+# 在工作区所有模块中更新
+depbump update -R
 
-# 更新每个包到最新版本
-depbump update E L
+# 组合标志
+depbump update -DR
+depbump update -ER
+```
 
-# 在工作区所有模块中更新每个包
-depbump update E R
+### Bump 命令
 
-# 递归更新（默认：直接依赖）
-depbump update R
+```bash
+# 智能升级，带 Go 版本兼容性检查
+depbump bump
+
+# 升级每个依赖
+depbump bump -E
+
+# 在工作区所有模块中升级
+depbump bump -R
+
+# 组合标志
+depbump bump -DR
+depbump bump -ER
 ```
 
 ### 同步命令
 
 ```bash
-# 执行 go work sync 同步工作区
-depbump sync
-
 # 同步依赖到其 Git 标签版本
 depbump sync tags
 
@@ -245,14 +233,14 @@ depbump sync subs
 
 ```bash
 # GitHub/GitLab 特定更新
-depbump update D --github-only      # 仅更新 GitHub 依赖
-depbump update D --skip-github      # 跳过 GitHub 依赖
-depbump update D --gitlab-only      # 仅更新 GitLab 依赖
-depbump update D --skip-gitlab      # 跳过 GitLab 依赖
+depbump update --github-only        # 仅更新 GitHub 依赖
+depbump update --skip-github        # 跳过 GitHub 依赖
+depbump update --gitlab-only        # 仅更新 GitLab 依赖
+depbump update --skip-gitlab        # 跳过 GitLab 依赖
 
-# 与 latest 模式结合
-depbump update D L --github-only
-depbump update E L --skip-gitlab
+# 组合标志
+depbump update -E --github-only
+depbump update -L --skip-gitlab
 ```
 
 ## 故障排除
@@ -276,12 +264,12 @@ depbump update E L --skip-gitlab
 
 ## 技巧和最佳实践
 
-- **从直接依赖开始**: 使用 `depbump update D` 进行更安全的更新
+- **从直接依赖开始**: 使用 `depbump update`（默认）进行更安全的更新
 - **更新后测试**: 依赖更新后务必运行测试
 - **使用版本控制**: 大型更新前提交 go.mod/go.sum
 - **渐进式更新**: 逐步更新依赖，不要一次全部更新
-- **监控破坏性变更**: 先使用 `depbump update D`（兼容）再使用 `depbump update D L`
-- **工作区一致性**: 在工作区中更新模块后运行 `depbump sync`
+- **监控破坏性变更**: 先使用 `depbump update` 再使用 `depbump update -L`
+- **使用 bump 命令**: 使用 `depbump bump` 防止 Go 工具链传染
 
 ---
 

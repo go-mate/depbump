@@ -44,46 +44,45 @@ cd project-path && depbump
 cd project-path && depbump module
 
 # Update module dependencies across workspace
-cd project-path && depbump module R
+cd project-path && depbump module -R
 
-# Update direct packages
-cd project-path && depbump update direct
-cd project-path && depbump update D        # Short alias // 短别名
+# Update direct packages (default, -D is optional)
+cd project-path && depbump update
+cd project-path && depbump update -D
 
-# Update direct dependencies to latest versions
-cd project-path && depbump update direct latest
-cd project-path && depbump update D L
+# Update each package (direct + indirect)
+cd project-path && depbump update -E
 
-# Update each package
-cd project-path && depbump update everyone
-cd project-path && depbump update E        # Short alias // 短别名
+# Update to latest versions (including prerelease)
+cd project-path && depbump update -L
 
-# Update each package to latest versions
-cd project-path && depbump update everyone latest
-cd project-path && depbump update E L
+# Update across workspace modules
+cd project-path && depbump update -R
 
-# Update direct dependencies across workspace
-cd project-path && depbump update recursive
-cd project-path && depbump update R
+# Combine flags
+cd project-path && depbump update -D -R    # direct + recursive
+cd project-path && depbump update -DR      # same as above
+cd project-path && depbump update -E -R    # each + recursive
+cd project-path && depbump update -ER      # same as above
 ```
 
 ### Advanced Usage
 
 ```bash
 # Update GitHub packages
-depbump update D --github-only
+depbump update --github-only
 
 # Skip GitLab dependencies
-depbump update D --skip-gitlab
+depbump update --skip-gitlab
 
 # Update GitLab packages
-depbump update D --gitlab-only
+depbump update --gitlab-only
 
 # Skip GitHub dependencies
-depbump update D --skip-github
+depbump update --skip-github
 
-# Sync workspace dependencies
-depbump sync
+# Combine flags
+depbump update -E --github-only
 
 # Sync dependencies to Git tag versions
 depbump sync tags
@@ -99,44 +98,25 @@ depbump sync subs
 # Prevents Go toolchain contagion while upgrading dependencies
 depbump bump
 
-# Upgrade direct dependencies with Go version matching
-depbump bump direct
-depbump bump D              # Short alias // 短别名
-
-# Upgrade direct dependencies to latest versions
-depbump bump direct latest
-depbump bump D L            # Short aliases // 短别名
-
-# Upgrade direct dependencies across workspace modules
-depbump bump direct recursive
-depbump bump D R            # Short aliases // 短别名
-
 # Upgrade each package (direct + indirect) with Go version matching
-depbump bump everyone
-depbump bump E              # Short alias // 短别名
-depbump bump each           # Alternative name // 别名
+depbump bump -E
 
-# Upgrade each package across workspace modules
-depbump bump everyone recursive
-depbump bump E R            # Short aliases // 短别名
-depbump bump -E -R          # Flag-based (equivalent) // 标志方式（等效）
+# Upgrade to latest versions (including prerelease)
+depbump bump -L
 
-# Works in workspace environment (processes each module)
-cd workspace-root && depbump bump
+# Upgrade across workspace modules
+depbump bump -R
+
+# Combine flags
+depbump bump -D -R          # direct + recursive
+depbump bump -DR            # same as above
+depbump bump -E -R          # each + recursive
+depbump bump -ER            # same as above
+
+# Note: -D and -E are exclusive, -E and -L are exclusive
 ```
 
-**Convenient Flag-Based Usage:**
-```bash
-# Use flags instead of subcommands (more concise)
-depbump bump -E             # everyone (each package)
-depbump bump -R             # recursive (workspace modules)
-depbump bump -E -R          # everyone + recursive
-depbump bump -L -R          # latest + recursive
-
-# Note: -E and -L cannot be used at the same time (exclusive flags)
-```
-
-**New `bump` Command Features:**
+**`bump` Command Features:**
 - 🧠 **Go Version Matching**: Analyzes each package's Go version requirements
 - 🚫 **Toolchain Contagion Prevention**: Avoids upgrades that would force toolchain changes
 - ⬆️ **Upgrade-First Method**: Does not downgrade existing packages
@@ -145,27 +125,26 @@ depbump bump -L -R          # latest + recursive
 
 ### Command Structure
 
+- **depbump**: Default module update (same as `depbump module`)
 - **module**: Update module dependencies using `go get -u ./...`
-  - **module R**: Update module dependencies across workspace
+  - `-R`: Update across workspace modules
 - **update**: Update dependencies with filtering options
-  - **update D**: Update direct dependencies - aliases: `direct`, `directs`
-  - **update D L**: Update direct dependencies to latest versions
-  - **update D R**: Update direct dependencies across workspace
-  - **update E**: Update each package - aliases: `everyone`, `each`
-  - **update E L**: Update each package to latest versions
-  - **update E R**: Update each package across workspace
-  - **update R**: Recursive update (default: direct) - aliases: `recursive`
-  - **update R D**: Recursive direct dependencies
-  - **update R E**: Recursive each package
-- **sync**: Git tag synchronization
+  - `-D`: Update direct dependencies (default)
+  - `-E`: Update each package (direct + indirect)
+  - `-L`: Use latest versions (including prerelease)
+  - `-R`: Update across workspace modules
+  - `--github-only` / `--skip-github`: GitHub filtering
+  - `--gitlab-only` / `--skip-gitlab`: GitLab filtering
+  - Note: `-D` and `-E` are exclusive
 - **bump**: Smart Go version matching upgrades
-
-### Source Filtering Options
-
-- `--github-only`: Update packages hosted on GitHub
-- `--skip-github`: Skip dependencies hosted on GitHub
-- `--gitlab-only`: Update packages hosted on GitLab
-- `--skip-gitlab`: Skip dependencies hosted on GitLab
+  - `-D`: Upgrade direct dependencies (default)
+  - `-E`: Upgrade each package (direct + indirect)
+  - `-L`: Use latest versions (including prerelease)
+  - `-R`: Upgrade across workspace modules
+  - Note: `-E` and `-L` are exclusive
+- **sync**: Git tag synchronization
+  - **tags**: Sync to Git tag versions
+  - **subs**: Sync with latest fallback
 
 ## Features
 
@@ -204,36 +183,45 @@ depbump
 depbump module
 
 # Update module dependencies across workspace
-depbump module R
+depbump module -R
 
-# Update direct dependencies with compatible versions
-depbump update D
+# Update direct dependencies (default)
+depbump update
 
-# Update direct dependencies to latest versions
-depbump update D L
+# Update each package (direct + indirect)
+depbump update -E
 
-# Update direct dependencies across workspace
-depbump update D R
+# Update to latest versions
+depbump update -L
 
-# Update each package including indirect ones
-depbump update E
+# Update across workspace
+depbump update -R
 
-# Update each package to latest versions
-depbump update E L
+# Combine flags
+depbump update -DR
+depbump update -ER
+```
 
-# Update each package across workspace
-depbump update E R
+### Bump Commands
 
-# Recursive update (default: direct dependencies)
-depbump update R
+```bash
+# Smart upgrade with Go version matching
+depbump bump
+
+# Upgrade each package
+depbump bump -E
+
+# Upgrade across workspace
+depbump bump -R
+
+# Combine flags
+depbump bump -DR
+depbump bump -ER
 ```
 
 ### Sync Commands
 
 ```bash
-# Execute go work sync in workspace
-depbump sync
-
 # Sync dependencies to corresponding Git tag versions
 depbump sync tags
 
@@ -245,14 +233,14 @@ depbump sync subs
 
 ```bash
 # GitHub/GitLab specific updates
-depbump update D --github-only      # GitHub packages
-depbump update D --skip-github      # Skip GitHub dependencies
-depbump update D --gitlab-only      # GitLab packages
-depbump update D --skip-gitlab      # Skip GitLab dependencies
+depbump update --github-only        # GitHub packages
+depbump update --skip-github        # Skip GitHub dependencies
+depbump update --gitlab-only        # GitLab packages
+depbump update --skip-gitlab        # Skip GitLab dependencies
 
-# Combine with latest mode
-depbump update D L --github-only
-depbump update E L --skip-gitlab
+# Combine flags
+depbump update -E --github-only
+depbump update -L --skip-gitlab
 ```
 
 ## Troubleshooting
@@ -276,12 +264,12 @@ depbump update E L --skip-gitlab
 
 ## Tips and Best Practices
 
-- **Start with direct packages**: Use `depbump update D` to get safe updates
+- **Start with direct packages**: Use `depbump update` (default) to get safe updates
 - **Test updates**: Run tests when updating packages
 - **Use version management**: Commit go.mod/go.sum before big updates
 - **Step-wise updates**: Update packages in steps, not at once
-- **Watch breaking changes**: Use `depbump update D` (compatible) before `depbump update D L`
-- **Workspace sync**: Run `depbump sync` when updating modules in workspaces
+- **Watch breaking changes**: Use `depbump update` before `depbump update -L`
+- **Use bump command**: Use `depbump bump` to prevent Go toolchain contagion
 
 ---
 

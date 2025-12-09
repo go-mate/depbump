@@ -28,6 +28,7 @@ func NewSyncCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 		Use:   "sync",
 		Short: "dep sync",
 		Long:  "dep sync",
+		Args:  cobra.NoArgs,
 	}
 	cmd.AddCommand(SyncTagsCmd(execConfig))
 	cmd.AddCommand(SyncSubsCmd(execConfig))
@@ -44,6 +45,7 @@ func SyncTagsCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 		Use:   "tags",
 		Short: "sync tags",
 		Long:  "sync tags",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			must.Done(SyncTags(execConfig, depbump.GetModeUpdate))
 		},
@@ -61,6 +63,7 @@ func SyncSubsCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 		Use:   "subs",
 		Short: "sync subs",
 		Long:  "sync subs",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			must.Done(SyncTags(execConfig, depbump.GetModeLatest))
 		},
@@ -74,12 +77,13 @@ func SyncSubsCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 // SyncTags 执行基于 Git 标签的依赖同步
 // 比较当前依赖版本与 Git 标签，在不同时进行更新
 func SyncTags(execConfig *osexec.ExecConfig, mode depbump.GetMode) error {
+	zaplog.SUG.Infoln("Starting tag sync, mode:", string(mode))
 	pkgTagsMap := GetPkgTagsMap(execConfig)
-	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
+	zaplog.SUG.Debugln("Tags map:", neatjsons.S(pkgTagsMap))
 
 	projectDIR := osmustexist.ROOT(execConfig.Path)
 	moduleInfo := done.VCE(depbump.GetModuleInfo(projectDIR)).Nice()
-	zaplog.SUG.Debugln(moduleInfo.Module.Path)
+	zaplog.SUG.Debugln("Module path:", moduleInfo.Module.Path)
 
 	for _, module := range moduleInfo.Require {
 		if module.Indirect {
@@ -99,10 +103,10 @@ func SyncTags(execConfig *osexec.ExecConfig, mode depbump.GetMode) error {
 		}
 
 		if pkgTag == module.Version {
-			zaplog.SUG.Debugln(projectDIR, module.Path, module.Version, "same")
+			zaplog.SUG.Debugln("Version same:", module.Path, module.Version)
 			continue
 		}
-		zaplog.SUG.Debugln(projectDIR, module.Path, module.Version, "sync", "=>", pkgTag)
+		zaplog.SUG.Debugln("Sync version:", module.Path, module.Version, "=>", pkgTag)
 
 		// Example command execution patterns:
 		// GOTOOLCHAIN=go1.22.8 go get -u github.com/yyle88/syntaxgo@v0.0.45
@@ -121,12 +125,12 @@ func SyncTags(execConfig *osexec.ExecConfig, mode depbump.GetMode) error {
 		if err != nil {
 			return erero.Wro(err)
 		}
-		zaplog.SUG.Debugln(string(output))
+		zaplog.SUG.Debugln("Output:", string(output))
 
-		zaplog.SUG.Debugln(projectDIR, module.Path, module.Version, "sync", "=>", pkgTag, "done")
+		zaplog.SUG.Debugln("Sync done:", module.Path, module.Version, "=>", pkgTag)
 	}
 
-	zaplog.SUG.Debugln(neatjsons.S(pkgTagsMap))
+	zaplog.SUG.Debugln("Tags map:", neatjsons.S(pkgTagsMap))
 	return nil
 }
 
@@ -141,9 +145,9 @@ func GetPkgTagsMap(execConfig *osexec.ExecConfig) map[string]string {
 	projectDIR := osmustexist.ROOT(execConfig.Path)
 	moduleInfo := done.VCE(depbump.GetModuleInfo(projectDIR)).Nice()
 
-	tagName, _ := gitgo.NewGcm(projectDIR, execConfig).LatestGitTag()
+	tagName, _, _ := gitgo.NewGcm(projectDIR, execConfig).GetLatestTag()
 	if tagName != "" {
-		zaplog.SUG.Debugln("pkg:", moduleInfo.Module.Path, "tag:", tagName)
+		zaplog.SUG.Debugln("Latest tag:", moduleInfo.Module.Path, tagName)
 	}
 
 	pkgTagsMap[moduleInfo.Module.Path] = tagName

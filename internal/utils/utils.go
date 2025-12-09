@@ -1,18 +1,24 @@
 // Package utils: Common functions supporting depbump package management
-// Provides semantic version comparison and Go version matching checks
+// Provides semantic version comparison, Go version matching checks, and workspace iteration
 // Implements standard Go module version comparison logic with pseudo-version support
-// Enables efficient package analysis and toolchain matching validation
+// Enables efficient package analysis, toolchain matching validation, and recursive module processing
 //
 // utils: depbump 包管理的通用工具函数
-// 提供语义版本比较和 Go 版本匹配检查
+// 提供语义版本比较、Go 版本匹配检查和工作区遍历
 // 实现官方 Go 模块版本比较逻辑，支持伪版本
-// 用于高效的包分析和工具链匹配验证
+// 用于高效的包分析、工具链匹配验证和递归模块处理
 package utils
 
 import (
+	"fmt"
 	"go/version"
 	"strings"
 
+	"github.com/go-mate/go-work/workspath"
+	"github.com/yyle88/eroticgo"
+	"github.com/yyle88/osexec"
+	"github.com/yyle88/osexistpath/osmustexist"
+	"github.com/yyle88/zaplog"
 	"golang.org/x/mod/semver"
 )
 
@@ -68,4 +74,40 @@ func IsStableVersion(version string) bool {
 	// Check valid semver with no prerelease suffix
 	// 检查有效 semver 且无预发布后缀
 	return semver.IsValid(version) && semver.Prerelease(version) == ""
+}
+
+// UIProgress formats progress display as "(<current>/total)" with 1-based index
+// Example: UIProgress(0, 10) returns "(<1>/10)"
+//
+// UIProgress 格式化进度显示，使用 1-based 索引
+// 示例：UIProgress(0, 10) 返回 "(<1>/10)"
+func UIProgress(idx, cnt int) string {
+	return fmt.Sprintf("(<%d>/%d)", idx+1, cnt)
+}
+
+// ForeachModule iterates over workspace modules and executes callback
+// Scans workspace using workspath configuration and processes each module
+//
+// ForeachModule 遍历工作区模块并执行回调
+// 使用 workspath 配置扫描工作区并处理每个模块
+func ForeachModule(execConfig *osexec.ExecConfig, fn func(*osexec.ExecConfig)) {
+	workPath := osmustexist.ROOT(execConfig.Path)
+
+	options := workspath.NewOptions().
+		WithIncludeCurrentProject(true).
+		WithIncludeCurrentPackage(false).
+		WithIncludeSubModules(true).
+		WithExcludeNoGo(true).
+		WithDebugMode(false)
+
+	moduleRoots := workspath.GetModulePaths(workPath, options)
+
+	zaplog.SUG.Infoln("Recursive mode: found", eroticgo.CYAN.Sprint(len(moduleRoots)), "modules")
+
+	for idx, modulePath := range moduleRoots {
+		zaplog.SUG.Infoln("Module", eroticgo.GREEN.Sprint(UIProgress(idx, len(moduleRoots))), "Processing:", eroticgo.CYAN.Sprint(modulePath))
+		fn(execConfig.NewConfig().WithPath(modulePath))
+	}
+
+	zaplog.SUG.Infoln("✅ Recursive updates completed!")
 }

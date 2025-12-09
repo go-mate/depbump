@@ -34,19 +34,19 @@ func main() {
 	// Get current working DIR
 	// 获取当前工作 DIR
 	currentPath := rese.C1(os.Getwd())
-	zaplog.LOG.Debug("current:", zap.String("path", currentPath))
+	zaplog.LOG.Debug("Current working path", zap.String("path", currentPath))
 
 	// Get executable path
 	// 获取可执行文件路径
 	executePath := rese.C1(os.Executable())
-	zaplog.LOG.Debug("execute:", zap.String("path", executePath))
+	zaplog.LOG.Debug("Executable path", zap.String("path", executePath))
 
 	// Detect project path from current DIR
 	// 从当前 DIR 检测项目路径
 	pathInfo, ok := workspath.GetProjectPath(currentPath)
 	must.True(ok)
 	projectPath := must.Nice(pathInfo.ProjectPath)
-	zaplog.LOG.Debug("project:", zap.String("path", projectPath))
+	zaplog.LOG.Debug("Project path detected", zap.String("path", projectPath))
 	must.Nice(projectPath)
 
 	// Initialize execution configuration with project path
@@ -59,6 +59,7 @@ func main() {
 		Use:   "depbump",
 		Short: "Go package management assistant",
 		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			depbumpmodcmd.UpdateModules(execConfig)
 		},

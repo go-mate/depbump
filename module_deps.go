@@ -16,6 +16,8 @@ import (
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/osexistpath"
 	"github.com/yyle88/tern/zerotern"
+	"github.com/yyle88/zaplog"
+	"go.uber.org/zap"
 	"golang.org/x/mod/modfile"
 )
 
@@ -122,6 +124,7 @@ func (a *ModuleInfo) GetScopedRequires(cate DepCate) []*Require {
 // GetModuleInfo 执行 'go mod edit -json' 并解析模块信息
 // 返回关于模块及其依赖的结构化数据
 func GetModuleInfo(projectPath string) (*ModuleInfo, error) {
+	zaplog.LOG.Debug("Loading module info", zap.String("path", projectPath))
 	output, err := osexec.ExecInPath(projectPath, "go", "mod", "edit", "-json")
 	if err != nil {
 		return nil, erero.Wro(err)
@@ -130,6 +133,7 @@ func GetModuleInfo(projectPath string) (*ModuleInfo, error) {
 	if err := json.Unmarshal(output, &moduleInfo); err != nil {
 		return nil, erero.Wro(err)
 	}
+	zaplog.LOG.Debug("Module info loaded", zap.String("module", moduleInfo.Module.Path), zap.Int("deps", len(moduleInfo.Require)))
 	return &moduleInfo, nil
 }
 

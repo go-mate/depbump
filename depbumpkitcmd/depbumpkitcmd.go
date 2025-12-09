@@ -18,10 +18,10 @@ import (
 
 	"github.com/go-mate/depbump"
 	"github.com/go-mate/depbump/internal/utils"
-	"github.com/go-mate/go-work/workspath"
 	"github.com/spf13/cobra"
 	"github.com/yyle88/eroticgo"
 	"github.com/yyle88/must"
+	"github.com/yyle88/must/mustboolean"
 	"github.com/yyle88/neatjson/neatjsons"
 	"github.com/yyle88/osexec"
 	"github.com/yyle88/osexistpath/osmustexist"
@@ -38,29 +38,34 @@ func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	// Flags defining bump actions
 	// 定义 bump 行为的标志
 	var (
-		useEveryone  bool
-		useLatest    bool
-		useRecursive bool
+		upDirectXX bool
+		upEveryone bool
+		upToLatest bool
+		recurseXqt bool
 	)
 
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "Bump dependencies to stable versions with Go version matching",
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
+			// Ensure direct and everyone flags cannot be combined
+			// 确保 direct 和 everyone 标志不能同时使用
+			mustboolean.Conflict(upDirectXX, upEveryone)
 			// Ensure everyone and latest flags cannot be combined
 			// 确保 everyone 和 latest 标志不能同时使用
-			must.Different(useEveryone, useLatest)
+			mustboolean.Conflict(upEveryone, upToLatest)
 
 			kit := NewBumpKit(execConfig)
 
 			config := &BumpDepsConfig{
-				Cate: tern.BVV(useEveryone, depbump.DepCateEveryone, depbump.DepCateDirect),
-				Mode: tern.BVV(useLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
+				Cate: tern.BVV(upEveryone, depbump.DepCateEveryone, depbump.DepCateDirect),
+				Mode: tern.BVV(upToLatest, depbump.GetModeLatest, depbump.GetModeUpdate),
 			}
 
 			// Execute recursive sync when enabled, otherwise standard sync
 			// 启用时执行递归同步，否则执行标准同步
-			if useRecursive {
+			if recurseXqt {
 				kit.SyncDependenciesRecursive(config)
 			} else {
 				kit.SyncDependencies(config)
@@ -70,87 +75,10 @@ func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 
 	// Add flags to bump command
 	// 给 bump 命令添加标志
-	cmd.Flags().BoolVarP(&useEveryone, "everyone", "E", false, "Bump each dependencies (direct + indirect)")
-	cmd.Flags().BoolVarP(&useLatest, "latest", "L", false, "Use latest versions (including prerelease)")
-	cmd.Flags().BoolVarP(&useRecursive, "recursive", "R", false, "Process dependencies across workspace modules")
-
-	// Add direct subcommand with latest sub-subcommand
-	directCmd := &cobra.Command{
-		Use:     "direct",
-		Aliases: []string{"D", "directs"},
-		Short:   "Bump direct dependencies to stable versions",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependencies(&BumpDepsConfig{
-				Cate: depbump.DepCateDirect,
-				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-			})
-		},
-	}
-	directCmd.AddCommand(&cobra.Command{
-		Use:     "latest",
-		Aliases: []string{"L"},
-		Short:   "Bump direct dependencies to latest versions (including prerelease)",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependencies(&BumpDepsConfig{
-				Cate: depbump.DepCateDirect,
-				Mode: depbump.GetModeLatest, // All versions // 所有版本
-			})
-		},
-	})
-	directCmd.AddCommand(&cobra.Command{
-		Use:     "recursive",
-		Aliases: []string{"R"},
-		Short:   "Bump direct dependencies across workspace modules",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependenciesRecursive(&BumpDepsConfig{
-				Cate: depbump.DepCateDirect,
-				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-			})
-		},
-	})
-	cmd.AddCommand(directCmd)
-
-	// Add everyone subcommand with latest sub-subcommand
-	everyoneCmd := &cobra.Command{
-		Use:     "everyone",
-		Aliases: []string{"E", "each"},
-		Short:   "Bump each dependencies to stable versions",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependencies(&BumpDepsConfig{
-				Cate: depbump.DepCateEveryone,
-				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-			})
-		},
-	}
-	everyoneCmd.AddCommand(&cobra.Command{
-		Use:     "latest",
-		Aliases: []string{"L"},
-		Short:   "Bump each dependencies to latest versions (including prerelease)",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependencies(&BumpDepsConfig{
-				Cate: depbump.DepCateEveryone,
-				Mode: depbump.GetModeLatest, // All versions // 所有版本
-			})
-		},
-	})
-	everyoneCmd.AddCommand(&cobra.Command{
-		Use:     "recursive",
-		Aliases: []string{"R"},
-		Short:   "Bump each dependencies across workspace modules",
-		Run: func(cmd *cobra.Command, args []string) {
-			kit := NewBumpKit(execConfig)
-			kit.SyncDependenciesRecursive(&BumpDepsConfig{
-				Cate: depbump.DepCateEveryone,
-				Mode: depbump.GetModeUpdate, // Stable versions within // 仅稳定版本
-			})
-		},
-	})
-	cmd.AddCommand(everyoneCmd)
+	cmd.Flags().BoolVarP(&upDirectXX, "D", "D", false, "Bump direct dependencies (default)")
+	cmd.Flags().BoolVarP(&upEveryone, "E", "E", false, "Bump each dependencies (direct + indirect)")
+	cmd.Flags().BoolVarP(&upToLatest, "L", "L", false, "Use latest versions (including prerelease)")
+	cmd.Flags().BoolVarP(&recurseXqt, "R", "R", false, "Process dependencies across workspace modules")
 
 	return cmd
 }
@@ -211,9 +139,9 @@ func NewBumpKit(execConfig *osexec.ExecConfig) *BumpKit {
 // 根据配置分析包的兼容性和版本处理
 // 仅应用兼容的升级以防止工具链版本冲突
 func (c *BumpKit) SyncDependencies(config *BumpDepsConfig) {
-	zaplog.SUG.Infoln("starting", string(config.Cate), "dependencies analysis - Go", eroticgo.CYAN.Sprint(c.TargetGoVersion))
+	zaplog.SUG.Infoln("Starting", string(config.Cate), "dependencies analysis - Go", eroticgo.CYAN.Sprint(c.TargetGoVersion))
 	deps := c.AnalyzeDependencies(config.Cate, config.Mode)
-	zaplog.SUG.Debugln("analysis result", neatjsons.S(deps))
+	zaplog.SUG.Debugln("Analysis result:", neatjsons.S(deps))
 
 	zaplog.SUG.Infoln("🔧 Applying", string(config.Cate), "updates...")
 	must.Done(c.ApplyUpdates(deps))
@@ -221,49 +149,12 @@ func (c *BumpKit) SyncDependencies(config *BumpDepsConfig) {
 }
 
 // SyncDependenciesRecursive performs package analysis and upgrades across workspace modules
-// Scans workspace to find modules using workspath configuration and processes each in isolation
-// Applies intelligent upgrades while preventing toolchain version conflicts in each module
 //
 // SyncDependenciesRecursive 在工作区模块中执行包分析和升级
-// 扫描工作区使用 workspath 配置找到模块，并独立处理每个模块
-// 应用智能升级，同时防止每个模块中的工具链版本冲突
 func (c *BumpKit) SyncDependenciesRecursive(config *BumpDepsConfig) {
-	workPath := osmustexist.ROOT(c.execConfig.Path)
-
-	// Configure workspace scan with module detection options
-	// 配置工作区扫描和模块检测选项
-	options := workspath.NewOptions().
-		WithIncludeCurrentProject(true).
-		WithIncludeCurrentPackage(false).
-		WithIncludeSubModules(true).
-		WithExcludeNoGo(true).
-		WithDebugMode(false)
-
-	// Find modules using workspace path configuration
-	// 使用工作区路径配置找到模块
-	moduleRoots := workspath.GetModulePaths(workPath, options)
-
-	zaplog.SUG.Infoln("Recursive mode: found", eroticgo.CYAN.Sprint(len(moduleRoots)), "modules")
-
-	// Process each module with intelligent bump operations
-	// 对每个模块执行智能 bump 操作
-	for idx, modulePath := range moduleRoots {
-		zaplog.SUG.Infoln("Module", eroticgo.GREEN.Sprint(fmt.Sprintf("(%d/%d)", idx+1, len(moduleRoots))), "Processing module:", eroticgo.CYAN.Sprint(modulePath))
-
-		// Create module-specific execution configuration
-		// 创建模块特定的执行配置
-		moduleExecConfig := c.execConfig.NewConfig().WithPath(modulePath)
-
-		// Initialize BumpKit instance with module context
-		// 用模块上下文初始化 BumpKit 实例
-		moduleKit := NewBumpKit(moduleExecConfig)
-
-		// Execute package synchronization within module scope
-		// 在模块范围内执行包同步
-		moduleKit.SyncDependencies(config)
-	}
-
-	zaplog.SUG.Infoln("✅ Recursive updates completed across modules!")
+	utils.ForeachModule(c.execConfig, func(moduleExecConfig *osexec.ExecConfig) {
+		NewBumpKit(moduleExecConfig).SyncDependencies(config)
+	})
 }
 
 // DependencyInfo represents comprehensive information about a package upgrade
@@ -294,13 +185,12 @@ func (c *BumpKit) AnalyzeDependencies(cate depbump.DepCate, mode depbump.GetMode
 	requires := moduleInfo.GetScopedRequires(cate)
 
 	deps := make([]*DependencyInfo, 0, len(requires))
-	zaplog.SUG.Infoln("analyzing", eroticgo.CYAN.Sprint(len(requires)), string(cate), "dependencies")
+	zaplog.SUG.Infoln("Analyzing", eroticgo.CYAN.Sprint(len(requires)), string(cate), "dependencies")
 
 	for idx, req := range requires {
 		// Display progress with enhanced UX feedback
 		// 显示进度，增强交互体验
-		progress := fmt.Sprintf("(%d/%d)", idx+1, len(requires))
-		zaplog.SUG.Infoln(progress, "analyzing", eroticgo.GREEN.Sprint(req.Path))
+		zaplog.SUG.Infoln(utils.UIProgress(idx, len(requires)), "Analyzing", eroticgo.GREEN.Sprint(req.Path))
 
 		versions := c.GetVersionList(req.Path)
 		if len(versions) == 0 {
@@ -317,7 +207,7 @@ func (c *BumpKit) AnalyzeDependencies(cate depbump.DepCate, mode depbump.GetMode
 		}
 
 		if dep.OldDepVersion != dep.NewDepVersion {
-			zaplog.SUG.Debugln("update recommended", eroticgo.GREEN.Sprint(neatjsons.S(dep)))
+			zaplog.SUG.Debugln("Update recommended:", eroticgo.GREEN.Sprint(neatjsons.S(dep)))
 		}
 
 		deps = append(deps, dep)
@@ -362,12 +252,12 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 	// 从当前版本开始，向上寻找兼容的版本（只升级，不降级）
 	for i := 0; i <= currentIndex; i++ {
 		version := versions[i]
-		zaplog.SUG.Debugln("checking", eroticgo.CYAN.Sprint(version))
+		zaplog.SUG.Debugln("Checking version:", eroticgo.CYAN.Sprint(version))
 
 		// Skip unstable versions when mode is UPDATE
 		// 当模式是 UPDATE 时跳过不稳定版本
 		if mode == depbump.GetModeUpdate && !utils.IsStableVersion(version) {
-			zaplog.SUG.Debugln("skip unstable version", eroticgo.YELLOW.Sprint(version))
+			zaplog.SUG.Debugln("Skip unstable version:", eroticgo.YELLOW.Sprint(version))
 			continue
 		}
 
@@ -380,7 +270,7 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 					Version:   version,
 					GoVersion: goReq,
 				}
-				zaplog.SUG.Debugln("found best version", eroticgo.GREEN.Sprint(neatjsons.S(packageVersion)))
+				zaplog.SUG.Debugln("Found best version:", eroticgo.GREEN.Sprint(neatjsons.S(packageVersion)))
 				return packageVersion
 			}
 		}
@@ -392,7 +282,7 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 		Version:   currentVersion,
 		GoVersion: c.GetPackageGoRequirement(pkg, currentVersion),
 	}
-	zaplog.SUG.Debugln("keep current version", eroticgo.YELLOW.Sprint(neatjsons.S(packageVersion)))
+	zaplog.SUG.Debugln("Keep current version:", eroticgo.YELLOW.Sprint(neatjsons.S(packageVersion)))
 	return packageVersion
 }
 
@@ -406,11 +296,11 @@ func (c *BumpKit) SelectBestPackageVersion(pkg string, versions []string, curren
 func (c *BumpKit) GetVersionList(pkg string) []string {
 	osmustexist.ROOT(c.execConfig.Path)
 
-	zaplog.SUG.Debugln("fetching versions", eroticgo.CYAN.Sprint(pkg))
+	zaplog.SUG.Debugln("Fetching versions:", eroticgo.CYAN.Sprint(pkg))
 
 	output, err := c.execConfig.Exec("go", "list", "-m", "-versions", pkg)
 	if err != nil {
-		zaplog.SUG.Warnln("failed to get versions", eroticgo.RED.Sprint(pkg), err.Error())
+		zaplog.SUG.Warnln("Failed to get versions:", eroticgo.RED.Sprint(pkg), err.Error())
 		return nil
 	}
 
@@ -443,12 +333,12 @@ func (c *BumpKit) GetPackageGoRequirement(pkgPath, version string) string {
 		return cached
 	}
 
-	zaplog.SUG.Debugln("downloading", eroticgo.CYAN.Sprint(pkgPath+"@"+version))
+	zaplog.SUG.Debugln("Downloading:", eroticgo.CYAN.Sprint(pkgPath+"@"+version))
 
 	// Fetch module go.mod info // 直接获取模块的 go.mod 信息
 	output, err := c.execConfig.Exec("go", "mod", "download", "-json", pkgPath+"@"+version)
 	if err != nil {
-		zaplog.SUG.Warnln("download failed", eroticgo.RED.Sprint(pkgPath+"@"+version), err.Error())
+		zaplog.SUG.Warnln("Download failed:", eroticgo.RED.Sprint(pkgPath+"@"+version), err.Error())
 		return ""
 	}
 
@@ -494,17 +384,17 @@ func (c *BumpKit) ApplyUpdates(deps []*DependencyInfo) error {
 
 	for _, dep := range deps {
 		if dep.OldDepVersion != dep.NewDepVersion {
-			zaplog.SUG.Debugln("updating", eroticgo.GREEN.Sprint(dep.Package))
+			zaplog.SUG.Debugln("Updating:", eroticgo.GREEN.Sprint(dep.Package))
 
 			_, err := c.execConfig.Exec("go", "get", dep.Package+"@"+dep.NewDepVersion)
 			if err != nil {
-				zaplog.SUG.Warnln("update failed", eroticgo.RED.Sprint(dep.Package))
+				zaplog.SUG.Warnln("Update failed:", eroticgo.RED.Sprint(dep.Package))
 				continue
 			}
 		}
 	}
 
-	zaplog.SUG.Infoln("cleaning up module dependencies")
+	zaplog.SUG.Infoln("Cleaning up module dependencies")
 	rese.V1(c.execConfig.Exec("go", "mod", "tidy", "-e"))
 	return nil
 }
