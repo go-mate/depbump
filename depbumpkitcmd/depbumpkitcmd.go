@@ -38,7 +38,7 @@ func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	// Flags defining bump actions
 	// 定义 bump 行为的标志
 	var (
-		upDirectXX bool
+		directMode bool
 		upEveryone bool
 		upToLatest bool
 		recurseXqt bool
@@ -51,7 +51,7 @@ func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// Ensure direct and everyone flags cannot be combined
 			// 确保 direct 和 everyone 标志不能同时使用
-			mustboolean.Conflict(upDirectXX, upEveryone)
+			mustboolean.Conflict(directMode, upEveryone)
 			// Ensure everyone and latest flags cannot be combined
 			// 确保 everyone 和 latest 标志不能同时使用
 			mustboolean.Conflict(upEveryone, upToLatest)
@@ -75,7 +75,7 @@ func NewBumpCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 
 	// Add flags to bump command
 	// 给 bump 命令添加标志
-	cmd.Flags().BoolVarP(&upDirectXX, "D", "D", false, "Bump direct dependencies (default)")
+	cmd.Flags().BoolVarP(&directMode, "D", "D", false, "Bump direct dependencies (default)")
 	cmd.Flags().BoolVarP(&upEveryone, "E", "E", false, "Bump each dependencies (direct + indirect)")
 	cmd.Flags().BoolVarP(&upToLatest, "L", "L", false, "Use latest versions (including prerelease)")
 	cmd.Flags().BoolVarP(&recurseXqt, "R", "R", false, "Process dependencies across workspace modules")

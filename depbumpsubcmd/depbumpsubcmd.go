@@ -26,7 +26,7 @@ import (
 // NewUpdateCmd 创建 update 命令，使用 -D/-E/-L/-R 标志
 func NewUpdateCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 	var (
-		upDirectXX bool
+		directMode bool
 		upEveryone bool
 		upToLatest bool
 		recurseXqt bool
@@ -45,7 +45,7 @@ func NewUpdateCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// Ensure direct and everyone flags cannot be combined
 			// 确保 direct 和 everyone 标志不能同时使用
-			mustboolean.Conflict(upDirectXX, upEveryone)
+			mustboolean.Conflict(directMode, upEveryone)
 
 			config.Cate = tern.BVV(upEveryone, depbump.DepCateEveryone, depbump.DepCateDirect)
 			config.Mode = tern.BVV(upToLatest, depbump.GetModeLatest, depbump.GetModeUpdate)
@@ -60,7 +60,7 @@ func NewUpdateCmd(execConfig *osexec.ExecConfig) *cobra.Command {
 
 	// Add flags to update command
 	// 给 update 命令添加标志
-	cmd.Flags().BoolVarP(&upDirectXX, "D", "D", false, "Update direct dependencies (default)")
+	cmd.Flags().BoolVarP(&directMode, "D", "D", false, "Update direct dependencies (default)")
 	cmd.Flags().BoolVarP(&upEveryone, "E", "E", false, "Update each dependencies (direct + indirect)")
 	cmd.Flags().BoolVarP(&upToLatest, "L", "L", false, "Use latest versions (including prerelease)")
 	cmd.Flags().BoolVarP(&recurseXqt, "R", "R", false, "Process dependencies across workspace modules")

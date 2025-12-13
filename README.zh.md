@@ -12,6 +12,7 @@
 ---
 
 <!-- TEMPLATE (ZH) BEGIN: LANGUAGE NAVIGATION -->
+
 ## 英文文档
 
 [ENGLISH README](README.md)
@@ -254,7 +255,7 @@ depbump update -L --skip-gitlab
 
 2. **依赖冲突**
    - 更新后运行 `go mod tidy -e` 进行清理
-   - 使用 `depbump update D` 而非 `depbump update E` 以获得更安全的更新
+   - 使用 `depbump update -D` 而非 `depbump update -E` 以获得更安全的更新
    - 检查 go.mod 中的不兼容版本约束
 
 3. **工作区问题**

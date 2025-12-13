@@ -12,6 +12,7 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 ---
 
 <!-- TEMPLATE (EN) BEGIN: LANGUAGE NAVIGATION -->
+
 ## CHINESE README
 
 [中文说明](README.zh.md)
@@ -254,7 +255,7 @@ depbump update -L --skip-gitlab
 
 2. **Package Conflicts**
    - Run `go mod tidy -e` following updates to clean up
-   - Use `depbump update D` instead of `depbump update E` to get safe updates
+   - Use `depbump update -D` instead of `depbump update -E` to get safe updates
    - Check go.mod when encountering incompatible version constraints
 
 3. **Workspace Issues**

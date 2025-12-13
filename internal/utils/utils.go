@@ -93,14 +93,12 @@ func UIProgress(idx, cnt int) string {
 func ForeachModule(execConfig *osexec.ExecConfig, fn func(*osexec.ExecConfig)) {
 	workPath := osmustexist.ROOT(execConfig.Path)
 
-	options := workspath.NewOptions().
-		WithIncludeCurrentProject(true).
-		WithIncludeCurrentPackage(false).
-		WithIncludeSubModules(true).
-		WithExcludeNoGo(true).
-		WithDebugMode(false)
-
-	moduleRoots := workspath.GetModulePaths(workPath, options)
+	moduleRoots := workspath.GetModulePaths(
+		workPath,
+		workspath.WithCurrentProject(),
+		workspath.ScanDeep(),
+		workspath.SkipNoGo(),
+	)
 
 	zaplog.SUG.Infoln("Recursive mode: found", eroticgo.CYAN.Sprint(len(moduleRoots)), "modules")
 

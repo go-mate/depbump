@@ -45,7 +45,7 @@ func main() {
 	// 从当前 DIR 检测项目路径
 	pathInfo, ok := workspath.GetProjectPath(currentPath)
 	must.True(ok)
-	projectPath := must.Nice(pathInfo.ProjectPath)
+	projectPath := must.Nice(pathInfo.Root)
 	zaplog.LOG.Debug("Project path detected", zap.String("path", projectPath))
 	must.Nice(projectPath)
 
