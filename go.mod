@@ -4,14 +4,14 @@ go 1.25.0
 
 require (
 	github.com/go-mate/go-work v0.0.13
-	github.com/go-xlan/gitgo v0.0.22
+	github.com/go-xlan/gitgo v0.0.23
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/yyle88/done v1.0.28
 	github.com/yyle88/erero v1.0.24
-	github.com/yyle88/eroticgo v0.0.5
-	github.com/yyle88/must v0.0.29
-	github.com/yyle88/neatjson v0.0.13
+	github.com/yyle88/eroticgo v0.0.6
+	github.com/yyle88/must v0.0.30
+	github.com/yyle88/neatjson v0.0.14
 	github.com/yyle88/osexec v0.0.38
 	github.com/yyle88/osexistpath v0.0.19
 	github.com/yyle88/rese v0.0.12
@@ -31,7 +31,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/yyle88/mutexmap v1.0.15 // indirect
-	github.com/yyle88/printgo v1.0.6 // indirect
+	github.com/yyle88/printgo v1.0.7 // indirect
 	github.com/yyle88/sure v0.0.42 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

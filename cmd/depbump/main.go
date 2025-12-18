@@ -55,15 +55,25 @@ func main() {
 
 	// Create root command with default module update action
 	// 创建根命令，默认执行模块更新操作
+	var recurseXqt bool
+
 	rootCmd := &cobra.Command{
 		Use:   "depbump",
 		Short: "Go package management assistant",
 		Long:  "Check and upgrade outdated dependencies in Go modules, with version bumping.",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			depbumpmodcmd.UpdateModules(execConfig)
+			if recurseXqt {
+				depbumpmodcmd.UpdateModulesRecursive(execConfig)
+			} else {
+				depbumpmodcmd.UpdateModules(execConfig)
+			}
 		},
 	}
+
+	// Add flags to root command
+	// 给根命令添加标志
+	rootCmd.Flags().BoolVarP(&recurseXqt, "R", "R", false, "Process modules across workspace")
 
 	// Add subcommands to root
 	// 添加子命令到根命令

@@ -16,6 +16,7 @@
 ## 英文文档
 
 [ENGLISH README](README.md)
+
 <!-- TEMPLATE (ZH) END: LANGUAGE NAVIGATION -->
 
 ## 核心特性
@@ -41,10 +42,13 @@ go install github.com/go-mate/depbump/cmd/depbump@latest
 # 基本模块更新（更新 go.mod 依赖）
 cd project-path && depbump
 
-# 更新模块依赖（同上，显式指定）
+# 在工作区所有模块中更新模块依赖
+cd project-path && depbump -R
+
+# 更新模块依赖（同 depbump，显式指定）
 cd project-path && depbump module
 
-# 在工作区所有模块中更新模块依赖
+# 在工作区所有模块中更新模块依赖（同 depbump -R）
 cd project-path && depbump module -R
 
 # 更新直接依赖（默认，-D 可选）
@@ -118,6 +122,7 @@ depbump bump -ER            # 同上
 ```
 
 **`bump` 命令特性：**
+
 - 🧠 **Go 版本兼容性**: 分析每个依赖的 Go 版本要求
 - 🚫 **工具链传染防护**: 避免强制工具链变更的升级
 - ⬆️ **仅升级方式**: 永不降级现有依赖
@@ -127,6 +132,7 @@ depbump bump -ER            # 同上
 ### 命令结构
 
 - **depbump**: 默认模块更新（同 `depbump module`）
+  - `-R`: 在工作区所有模块中更新
 - **module**: 使用 `go get -u ./...` 更新模块依赖
   - `-R`: 在工作区所有模块中更新
 - **update**: 带过滤选项的依赖更新
@@ -152,6 +158,7 @@ depbump bump -ER            # 同上
 ### 智能依赖管理
 
 depbump 提供了智能的依赖管理功能，能够：
+
 - 自动解析 `go.mod` 文件中的依赖信息
 - 检测可用的升级版本
 - 处理版本兼容性问题
@@ -160,6 +167,7 @@ depbump 提供了智能的依赖管理功能，能够：
 ### 工作区集成
 
 支持 Go 1.18+ 的工作区功能：
+
 - 自动发现工作区中的所有模块
 - 批量处理多个模块的依赖更新
 - 保持工作区依赖的一致性
@@ -168,6 +176,7 @@ depbump 提供了智能的依赖管理功能，能够：
 ### Git 标签同步
 
 提供与 Git 标签的集成功能：
+
 - 同步依赖版本到对应的 Git 标签
 - 支持标签版本验证
 - 处理缺失标签的情况
@@ -180,10 +189,13 @@ depbump 提供了智能的依赖管理功能，能够：
 # 更新模块依赖（默认操作）
 depbump
 
+# 在工作区所有模块中更新模块依赖
+depbump -R
+
 # 更新模块依赖（显式指定）
 depbump module
 
-# 在工作区所有模块中更新模块依赖
+# 在工作区所有模块中更新模块依赖（同 depbump -R）
 depbump module -R
 
 # 更新直接依赖（默认）

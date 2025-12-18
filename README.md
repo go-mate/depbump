@@ -16,6 +16,7 @@ Check and upgrade outdated dependencies in Go modules, with version bumping.
 ## CHINESE README
 
 [中文说明](README.zh.md)
+
 <!-- TEMPLATE (EN) END: LANGUAGE NAVIGATION -->
 
 ## Main Features
@@ -41,10 +42,13 @@ go install github.com/go-mate/depbump/cmd/depbump@latest
 # Basic module update (updates go.mod dependencies)
 cd project-path && depbump
 
-# Update module dependencies (same as above, explicit)
+# Update module dependencies across workspace
+cd project-path && depbump -R
+
+# Update module dependencies (same as depbump, explicit)
 cd project-path && depbump module
 
-# Update module dependencies across workspace
+# Update module dependencies across workspace (same as depbump -R)
 cd project-path && depbump module -R
 
 # Update direct packages (default, -D is optional)
@@ -118,6 +122,7 @@ depbump bump -ER            # same as above
 ```
 
 **`bump` Command Features:**
+
 - 🧠 **Go Version Matching**: Analyzes each package's Go version requirements
 - 🚫 **Toolchain Contagion Prevention**: Avoids upgrades that would force toolchain changes
 - ⬆️ **Upgrade-First Method**: Does not downgrade existing packages
@@ -127,6 +132,7 @@ depbump bump -ER            # same as above
 ### Command Structure
 
 - **depbump**: Default module update (same as `depbump module`)
+  - `-R`: Update across workspace modules
 - **module**: Update module dependencies using `go get -u ./...`
   - `-R`: Update across workspace modules
 - **update**: Update dependencies with filtering options
@@ -152,6 +158,7 @@ depbump bump -ER            # same as above
 ### Smart Package Management
 
 depbump provides intelligent package management that can:
+
 - Auto parse package information from `go.mod` files
 - Detect available upgrade versions
 - Handle version matching issues
@@ -160,6 +167,7 @@ depbump provides intelligent package management that can:
 ### Workspace Integration
 
 Supports Go 1.18+ workspace features:
+
 - Auto detect modules in workspace
 - Batch process package updates across multiple modules
 - Maintain coherence across workspace packages
@@ -168,6 +176,7 @@ Supports Go 1.18+ workspace features:
 ### Git Tag Synchronization
 
 Provides Git tag integration features:
+
 - Sync package versions to corresponding Git tags
 - Support tag version verification
 - Handle missing tag scenarios
@@ -180,10 +189,13 @@ Provides Git tag integration features:
 # Update module dependencies (default action)
 depbump
 
+# Update module dependencies across workspace
+depbump -R
+
 # Update module dependencies (explicit)
 depbump module
 
-# Update module dependencies across workspace
+# Update module dependencies across workspace (same as depbump -R)
 depbump module -R
 
 # Update direct dependencies (default)
